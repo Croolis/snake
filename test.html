@@ -5,23 +5,33 @@
         <meta charset='utf-8' />
     </head>
     <body>
-        <canvas height='631' width='1051' id='playground'>Обновите браузер</canvas>
+        <canvas height='423' width='1051' id='playground'>Обновите браузер</canvas>
         <script>
             var h_amount = 20, w_amount = 40, size = 20, border = 1;
             // количество клеток по вертикали, горизонтали, размер клетки, толщина границы
             var canvas_width = border + (border + size) * w_amount, canvas_height = border + (border + size) * h_amount;
             // размеры поля
+            var field = new Array(w_amount);
+            for (var i = 0; i < w_amount; i++) {
+                field[i] = new Array(h_amount);
+            }
+
+            for (var i = 0; i < w_amount; i++)
+                for (var j = 0; j < h_amount; j++)
+                    field[i][j] = 0;
 
             var canvas = document.getElementById("playground"),
                 context = canvas.getContext('2d');
 
             // функция, закрашивающая клетку поля с координатами (x, y) 
             // в цвет color с рамкой размера margin
-            function fill_square(x, y, color, margin) {
+            function fill_square(x, y, type) {
+                var margin = 1;
                 var current_style = context.fillStyle;
                 context.fillStyle = color;
                 context.fillRect(x * (border + size) + border + margin, y * (border + size) + border + margin,
                     size - 2 * margin, size - 2 * margin);
+                // TODO: Рисовать спрайты вместо квадратов
                 context.fillStyle = current_style;
             }
 
@@ -60,9 +70,8 @@
                 }, 1000);
             }
 
-
             // разделяет поле на клетки
-            function layout() {
+            function display_field() {
                 for (var i = 0; i < canvas_height; i += border + size) {
                     context.fillRect(0, i, canvas_width, border);
                 }
@@ -71,7 +80,17 @@
                 }
             }
 
-            fill_square(0, 0, "orange", 1);
+            function battleground() {
+                context.clearRect(0, 0, canvas_width, canvas_height);
+
+                display_field()
+
+                // обновить field данными из websocket
+
+                for (var i = 0; i < w_amount; i++)
+                    for (var j = 0; j < h_amount; j++)
+                            fill_square(i, j, field[i][j]);
+            }
 
             function duel() {
                 context.clearRect(0, 0, canvas_width, canvas_height);
@@ -92,7 +111,7 @@
                 fill_progress_bar(canvas_width - bar_width - margin, margin, bar_width, 50, right_progress, "blue", false);
             }
 
-            timer(3, duel);
+            timer(3, battleground);
 
         </script>
     </body>
