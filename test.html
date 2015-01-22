@@ -5,7 +5,7 @@
         <meta charset='utf-8' />
     </head>
     <body>
-        <canvas height='423' width='1051' id='playground'>Обновите браузер</canvas>
+        <canvas height='421' width='841' id='playground'>Обновите браузер</canvas>
         <script>
             var h_amount = 20, w_amount = 40, size = 20, border = 1;
             // количество клеток по вертикали, горизонтали, размер клетки, толщина границы
@@ -16,6 +16,10 @@
                 field[i] = new Array(h_amount);
             }
 
+            // спрайты змейки
+            var body = new Image();
+            body.src = 't.jpg';
+
             for (var i = 0; i < w_amount; i++)
                 for (var j = 0; j < h_amount; j++)
                     field[i][j] = 0;
@@ -25,14 +29,26 @@
 
             // функция, закрашивающая клетку поля с координатами (x, y) 
             // в цвет color с рамкой размера margin
-            function fill_square(x, y, type) {
-                var margin = 1;
-                var current_style = context.fillStyle;
-                context.fillStyle = color;
-                context.fillRect(x * (border + size) + border + margin, y * (border + size) + border + margin,
-                    size - 2 * margin, size - 2 * margin);
-                // TODO: Рисовать спрайты вместо квадратов
-                context.fillStyle = current_style;
+            function fill_square(x, y, type, color) {
+                var margin = 0, rotation = type % 4;
+                context.save();
+                switch (rotation) {
+                    case 0:
+                        context.translate(x * (border + size) + border + margin, y * (border + size) + border + margin);
+                        break;
+                    case 1:
+                        context.translate(x * (border + size) + border + margin + size, y * (border + size) + border + margin);
+                        break;
+                    case 2:
+                        context.translate(x * (border + size) + border + margin + size, y * (border + size) + border + margin + size);
+                        break;
+                    case 3:
+                        context.translate(x * (border + size) + border + margin, y * (border + size) + border + margin + size);
+                        break;
+                }
+                context.rotate(Math.PI/2 * rotation);
+                context.drawImage(body, 0, 0);
+                context.restore();
             }
 
             // функция закрашивает левый или правый progress bar поединка в цвет color
@@ -87,9 +103,11 @@
 
                 // обновить field данными из websocket
 
-                for (var i = 0; i < w_amount; i++)
-                    for (var j = 0; j < h_amount; j++)
-                            fill_square(i, j, field[i][j]);
+                fill_square(1, 5, 8, "orange");
+
+                //for (var i = 0; i < w_amount; i++)
+                  //  for (var j = 0; j < h_amount; j++)
+                    //        fill_square(i, j, field[i][j] + 1, "red");
             }
 
             function duel() {
@@ -110,7 +128,7 @@
                 fill_progress_bar(margin, margin, bar_width, 50, left_progress, "red", true);
                 fill_progress_bar(canvas_width - bar_width - margin, margin, bar_width, 50, right_progress, "blue", false);
             }
-
+            
             timer(3, battleground);
 
         </script>
