@@ -1,0 +1,99 @@
+<!doctype html>
+<html>
+    <head>
+        <title>canvas</title>
+        <meta charset='utf-8' />
+    </head>
+    <body>
+        <canvas height='631' width='1051' id='playground'>Обновите браузер</canvas>
+        <script>
+            var h_amount = 20, w_amount = 40, size = 20, border = 1;
+            // количество клеток по вертикали, горизонтали, размер клетки, толщина границы
+            var canvas_width = border + (border + size) * w_amount, canvas_height = border + (border + size) * h_amount;
+            // размеры поля
+
+            var canvas = document.getElementById("playground"),
+                context = canvas.getContext('2d');
+
+            // функция, закрашивающая клетку поля с координатами (x, y) 
+            // в цвет color с рамкой размера margin
+            function fill_square(x, y, color, margin) {
+                var current_style = context.fillStyle;
+                context.fillStyle = color;
+                context.fillRect(x * (border + size) + border + margin, y * (border + size) + border + margin,
+                    size - 2 * margin, size - 2 * margin);
+                context.fillStyle = current_style;
+            }
+
+            // функция закрашивает левый или правый progress bar поединка в цвет color
+            // на процент, равный progress
+            function fill_progress_bar(x, y, width, height, progress, color, left) {
+                var current_style = context.fillStyle, border = 2;
+                context.fillStyle = color;
+                if (left == false)
+                    context.fillRect(x + border + (width - 2 * border) * (1 - progress), 
+                        y + border, (width - 2 * border) * progress, height - 2 * border);
+                else
+                    context.fillRect(x + border, 
+                        y + border, (width - 2 * border) * progress, height - 2 * border);
+                context.fillStyle = current_style;
+            }
+
+            // отсчитывает time секунд с выводом на экран, после чего вызывает next_func
+            function timer(time, next_func) {
+                var i = time;
+                context.clearRect(0, 0, canvas_width, canvas_height);
+                context.textBaseline = "middle";
+                context.textAlign = "center";
+                context.font = 'bold 50px sans-serif';
+                var timerId = setTimeout(function go() {
+                    if (i > 0) {
+                        context.clearRect(0, 0, canvas_width, canvas_height);
+                        context.fillText(i, canvas_width / 2, canvas_height / 2);
+                        setTimeout(go, 1000);
+                    }
+                    else {
+                        clearTimeout(timerId);
+                        next_func();
+                    }
+                    i--;
+                }, 1000);
+            }
+
+
+            // разделяет поле на клетки
+            function layout() {
+                for (var i = 0; i < canvas_height; i += border + size) {
+                    context.fillRect(0, i, canvas_width, border);
+                }
+                for (var i = 0; i < canvas_width; i += border + size) {
+                    context.fillRect(i, 0, border, canvas_height);
+                }
+            }
+
+            fill_square(0, 0, "orange", 1);
+
+            function duel() {
+                context.clearRect(0, 0, canvas_width, canvas_height);
+                
+                var separator = 50, margin = 10, bar_width = (canvas_width - separator - 2 * margin) / 2;
+                // расстояние между bar'ами, отступ между bar'ом и краем, ширина bar'a
+                var left_progress, right_progress;
+                // эти значения каким-то образом получаются через websocket
+                context.strokeRect(margin, margin, bar_width, 50);
+                // левый progress bar
+                context.strokeRect(canvas_width - bar_width - margin, margin, bar_width, 50);
+                // правый progress bar
+
+                // тестирование progress bar'ов
+                left_progress = 1/2;
+                right_progress = 2/3;
+                fill_progress_bar(margin, margin, bar_width, 50, left_progress, "red", true);
+                fill_progress_bar(canvas_width - bar_width - margin, margin, bar_width, 50, right_progress, "blue", false);
+            }
+
+            timer(3, duel);
+
+        </script>
+    </body>
+</html>
