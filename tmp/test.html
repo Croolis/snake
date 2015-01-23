@@ -86,6 +86,26 @@
                 }, 1000);
             }
 
+            function recolored_image(image, red, green, blue) { // возвращает перекрашенную картинку. Рисуется на канвас с помощью putImageData(img, x, y)
+                var tmpImage = context.getImageData(0, 0, image.width, image.height);
+                context.drawImage(image, 0, 0);
+                var imageData = context.getImageData(0, 0, image.width, image.height);
+                context.putImageData(tmpImage, 0, 0); // восстановление канваса
+
+                var color_barrier = 50;  // все цвета от 0 до color_barrier будут перекрашиваться
+
+                for(var i = 0; i < image.width * image.height * 4; i += 4) {
+                    if(imageData.data[i] <= color_barrier && imageData.data[i+1] <= color_barrier && imageData.data[i+2] <= color_barrier) {
+                        imageData.data[i] += red;
+                        imageData.data[i+1] += green;
+                        imageData.data[i+2] += blue;
+                        // imageData.data[i+3]  <-- альфа-канал
+                    }
+                }
+
+                return imageData;
+            }
+
             // разделяет поле на клетки
             function display_field() {
                 for (var i = 0; i < canvas_height; i += border + size) {
