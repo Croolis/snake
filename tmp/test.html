@@ -18,7 +18,7 @@
 
             // спрайты змейки
             var body = new Image();
-            body.src = 't.jpg';
+            body.src = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQIAHAAcAAD//gATQ3JlYXRlZCB3aXRoIEdJTVD/2wBDAAQDAwQDAwQEAwQFBAQFBgoHBgYGBg0JCggKDw0QEA8NDw4RExgUERIXEg4PFRwVFxkZGxsbEBQdHx0aHxgaGxr/2wBDAQQFBQYFBgwHBwwaEQ8RGhoaGhoaGhoaGhoaGhoaGhoaGhoaGhoaGhoaGhoaGhoaGhoaGhoaGhoaGhoaGhoaGhr/wAARCAAUABQDASIAAhEBAxEB/8QAFwABAQEBAAAAAAAAAAAAAAAAAAcGCP/EACMQAAICAgICAgMBAAAAAAAAAAIDAQQFBgAHERITIRQXIlH/xAAUAQEAAAAAAAAAAAAAAAAAAAAA/8QAFBEBAAAAAAAAAAAAAAAAAAAAAP/aAAwDAQACEQMRAD8A6OJX7D7qz2vbfs12pU1O3jcrhtVrq/EDIKBQsHIObMfJaWNs5CAWQrA6i/kEpKPNY2rZKuo67kc1kFuemmqTGvWGCfZZM+q0JGZj3aw5FYB58kZiMfcxyP8Aa2yVcH3h1jY3VeM1vU8Wq/cq7RfGPV2QZXaicb80zA1RlJk+SZPhxJAR/oJ5sO3qFX10rP5msm3htY2VOTyENXBwlc17FYbP9fyIobZVYNhSMLWljPPkIiQy+b6XzvZmUfsW0dhdgaUdn1Gngddzy6iaNeBiBBsgBC15F7mZwRQMn8YkYrEycuHHAm/e9dmR6zv4ddt1FOeyGMwltyICWRVu369WxAe4kMFKXsiJmJ8TPmPuI5QL9CrlKNmjk6ybtG0o02K71wxbllEwQGM+YIZiZiYn6mJ444E/6fpL12ptOm48nHhtSzcY3FfkPN7QqnTq2xUTDmZIVzbJQf4paxnzMSROOOB//9k=";
 
             for (var i = 0; i < w_amount; i++)
                 for (var j = 0; j < h_amount; j++)
@@ -26,6 +26,27 @@
 
             var canvas = document.getElementById("playground"),
                 context = canvas.getContext('2d');
+
+            function recolor_image(image, red, green, blue) { // возвращает перекрашенную картинку. Рисуется на канвас с помощью putImageData(img, x, y)
+            	var temp_canvas = document.createElement('canvas');
+				var temp_context = temp_canvas.getContext('2d');
+				temp_context.drawImage(image, 0, 0);
+				var imageData = temp_context.getImageData(0, 0, image.width, image.height);
+                delete temp_context;
+                delete temp_canvas;
+                
+                var color_barrier = 50;  // все цвета от 0 до color_barrier будут перекрашиваться
+
+                for(var i = 0; i < image.width * image.height * 4; i += 4) {
+                    if(imageData.data[i] <= color_barrier && imageData.data[i+1] <= color_barrier && imageData.data[i+2] <= color_barrier) {
+                        imageData.data[i] += red;
+                        imageData.data[i+1] += green;
+                        imageData.data[i+2] += blue;
+                        // imageData.data[i+3]  <-- альфа-канал
+                    }
+                }
+                return imageData;
+            }
 
             // функция, закрашивающая клетку поля с координатами (x, y) 
             // в цвет color с рамкой размера margin
@@ -47,8 +68,15 @@
                         break;
                 }
                 context.rotate(Math.PI/2 * rotation);
-                context.drawImage(body, 0, 0);
+                var temp_canvas = document.createElement('canvas');
+				var temp_context = temp_canvas.getContext('2d');
+				// TODO: выделение из color переменных red, green, blue
+				temp_context.putImageData(recolor_image(body, 250, 0, 0), 0, 0);
+				// перекрашенный спрайт помещается на временный canvas, после чего оттуда печатается на основной
+				context.drawImage(temp_canvas, 0, 0);
                 context.restore();
+                delete temp_context;
+                delete temp_canvas;
             }
 
             // функция закрашивает левый или правый progress bar поединка в цвет color
@@ -86,26 +114,6 @@
                 }, 1000);
             }
 
-            function recolored_image(image, red, green, blue) { // возвращает перекрашенную картинку. Рисуется на канвас с помощью putImageData(img, x, y)
-                var tmpImage = context.getImageData(0, 0, image.width, image.height);
-                context.drawImage(image, 0, 0);
-                var imageData = context.getImageData(0, 0, image.width, image.height);
-                context.putImageData(tmpImage, 0, 0); // восстановление канваса
-
-                var color_barrier = 50;  // все цвета от 0 до color_barrier будут перекрашиваться
-
-                for(var i = 0; i < image.width * image.height * 4; i += 4) {
-                    if(imageData.data[i] <= color_barrier && imageData.data[i+1] <= color_barrier && imageData.data[i+2] <= color_barrier) {
-                        imageData.data[i] += red;
-                        imageData.data[i+1] += green;
-                        imageData.data[i+2] += blue;
-                        // imageData.data[i+3]  <-- альфа-канал
-                    }
-                }
-
-                return imageData;
-            }
-
             // разделяет поле на клетки
             function display_field() {
                 for (var i = 0; i < canvas_height; i += border + size) {
@@ -123,7 +131,7 @@
 
                 // обновить field данными из websocket
 
-                fill_square(1, 5, 8, "orange");
+                fill_square(1, 5, 7, "orange");
 
                 //for (var i = 0; i < w_amount; i++)
                   //  for (var j = 0; j < h_amount; j++)
