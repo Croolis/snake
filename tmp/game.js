@@ -4,11 +4,11 @@ var h_amount = 20, w_amount = 40, size = 20, border = 1;
 // размеры поля
 var canvas_width = border + (border + size) * w_amount, canvas_height = border + (border + size) * h_amount;
 // обработчик нажатий
-document.getElementById('playground').onkeydown = key_handler;
+document.onkeydown = key_handler;
 function key_handler(event) {
     if (event.type == "keydown")
         var dir;
-        switch (e.keyCode) {
+        switch (event.keyCode) {
             case (37): dir = "Left"; break;
             case (38): dir = "Up"; break;
             case (39): dir = "Right"; break;

@@ -5,6 +5,10 @@ timer(4, function() {
 
     };
 
+    send = function(data) {
+        socket.send(JSON.stringify(data));
+    }
+
     socket.onmessage = function(event) {
         console.log(event)
         snakes = JSON.parse(event.data).snakes;
