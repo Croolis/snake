@@ -49,19 +49,11 @@ function keys(arr) {
 // спрайты змейки
 var snake_sprites = new Image();
 snake_sprites.src = "snake2.png";
+// спрайты еды
+var food_sprites = new Image();
+food_sprites.src = "apple.png";
 
-var snakes = [
-                [[2, 0],[1, 0], [0, 0]],
-                [[0, 1],[1, 1], [2, 1]],
-                [[3,3],[2, 3],[1, 3], [0, 3]],
-                [[0, 4],[1, 4], [2, 4], [3, 4]],
-                [[5, 0], [5, 1], [5,2]],
-                [[6, 2], [6, 1], [6,0]],
-                [[7, 0], [7, 1], [7,2], [7,3]],
-                [[8, 3], [8, 2], [8,1], [8,0]],
-                [[5, 10],[5, 11], [5, 12], [5, 13], [6, 13], [6, 14], [7, 14]],
-                [[10, 10], [10, 11], [11, 11], [12, 11], [12, 10], [12, 9], [12, 8], [11, 8], [10, 8], [9, 8],  [8, 8], [8,9]]
-            ];
+var snakes, foods, duel_data;
 
 var canvas = document.getElementById("playground"),
     context = canvas.getContext('2d');
@@ -93,7 +85,10 @@ function recolor_image(snake_sprites, red, green, blue) {
 // отображает в квадрате с координатами x, y
 // картинку с кодом type
 function fill_square(x, y, type) {
-    context.drawImage(snake_sprites, size * (type % 4), size * Math.floor(type / 4), size, size, x * (border + size) + border, y * (border + size) + border, size, size);
+    if (type <= 31)
+        context.drawImage(snake_sprites, size * (type % 4), size * Math.floor(type / 4), size, size, x * (border + size) + border, y * (border + size) + border, size, size);
+    else 
+       context.drawImage(food_sprites, x * (border + size) + border, y * (border + size) + border, size, size);
 }
 
 function clear_square(x, y) {
@@ -150,7 +145,11 @@ function display_field() {
 function battleground() {
     context.clearRect(0, 0, canvas_width, canvas_height);
 
-    display_field()
+    display_field();
+
+    if (duel_data != null) {
+        duel();
+    }
 
     for (var i = 0; i < snakes.length; i++)
         for (var j = 0; j < snakes[i].length; j++)
@@ -171,6 +170,7 @@ function battleground() {
             fill_square(snakes[i][j][0], snakes[i][j][1], type);
         }
     }
+
     iter_counter = (iter_counter + 1) % 2;
 }
 
@@ -191,5 +191,3 @@ function duel() {
     fill_progress_bar(margin, margin, bar_width, 50, left_progress, "red", true);
     fill_progress_bar(canvas_width - bar_width - margin, margin, bar_width, 50, right_progress, "blue", false);
 }
-
-timer(3, battleground);
