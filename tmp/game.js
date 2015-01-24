@@ -85,10 +85,10 @@ function recolor_image(snake_sprites, red, green, blue) {
 // отображает в квадрате с координатами x, y
 // картинку с кодом type
 function fill_square(x, y, type) {
-    if (type <= 31)
+    if (type != -25)
         context.drawImage(snake_sprites, size * (type % 4), size * Math.floor(type / 4), size, size, x * (border + size) + border, y * (border + size) + border, size, size);
     else 
-       context.drawImage(food_sprites, x * (border + size) + border, y * (border + size) + border, size, size);
+        context.drawImage(food_sprites, x * (border + size) + border, y * (border + size) + border, size, size);
 }
 
 function clear_square(x, y) {
@@ -170,7 +170,9 @@ function battleground() {
             fill_square(snakes[i][j][0], snakes[i][j][1], type);
         }
     }
-
+    for (var i = 0; i < foods.length; i++) {
+        fill_square(foods[i][0], foods[i][1], -25);
+    }
     iter_counter = (iter_counter + 1) % 2;
 }
 
