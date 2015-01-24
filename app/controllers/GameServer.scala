@@ -6,7 +6,7 @@ package controllers {
 import game.GameState
 
 class GameServer(val players: Array[Channel[JsValue]]) extends Runnable {
-  val gameState = new GameState(2, 40, 40)
+  val gameState = new GameState(2, 40, 20)
 
   def changeDirection(player: Int, direction: JsValue) = {
     gameState.changeDirection(player, game.Orientation.fromString(direction.toString().tail.init))
@@ -16,7 +16,7 @@ class GameServer(val players: Array[Channel[JsValue]]) extends Runnable {
     while (true) {
       gameState.update()
       players.zipWithIndex foreach { case (x, y) => x.push(gameState.serialize())}
-      Thread.sleep(500)
+      Thread.sleep(250)
     }
   }
 }
