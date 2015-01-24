@@ -9,7 +9,7 @@ class GameServer(val players: Array[Channel[JsValue]]) extends Runnable {
   val gameState = new GameState(2, 40, 40)
 
   def changeDirection(player: Int, direction: JsValue) = {
-    gameState.changeDirection(player, game.Orientation.fromString(direction.toString()))
+    gameState.changeDirection(player, game.Orientation.fromString(direction.toString().tail.init))
   }
 
   def run() {

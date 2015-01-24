@@ -3,7 +3,7 @@ import play.api.libs.json._
 
 package game {
 
-class BattleState(val s1: Snake, val s2: Snake) {
+class BattleState(val s1index: Int, val s1: Snake, val s2index: Int, val s2: Snake) {
   private final val tick = 5
 
   private var _pow1 = 100 * s1.length / (s1.length + s2.length)
@@ -34,6 +34,8 @@ class BattleState(val s1: Snake, val s2: Snake) {
   }
 
   def serialize(): JsValue = Json.toJson(Map(
+    "snake1" -> Json.toJson(s1index),
+    "snake2" -> Json.toJson(s2index),
     "win" -> Json.toJson(win),
     "pow1" -> Json.toJson(pow1),
     "pow2" -> Json.toJson(pow2),

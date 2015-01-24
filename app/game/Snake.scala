@@ -43,7 +43,7 @@ object Orientation {
  * Describes state fo a snake
  */
 class Snake(position: (Int, Int), val fieldSize: (Int, Int), private var _orientation: Orientation) {
-  private var _body = Queue(position)
+  private var _body = Queue(position, Orientation.step(position, fieldSize, _orientation))
   private var _food = 0
 
   def body = _body
@@ -75,7 +75,7 @@ class Snake(position: (Int, Int), val fieldSize: (Int, Int), private var _orient
 
   def head = _body.last
 
-  def serialize() = Json.toJson(body map { case (x, y) => Json.toJson(Seq(x, y))})
+  def serialize() = Json.toJson(body.reverse.map { case (x, y) => Json.toJson(Seq(x, y))})
 }
 
 }
