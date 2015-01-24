@@ -33,8 +33,8 @@ class GameState(val playersCount: Int, val width: Int, val height: Int) {
         if i < j
         if snakes(i) != null && snakes(j) != null
         if snakes(i).head == snakes(j).head ||
-           snakes(j).length >= 2 && snakes(i).head == snakes(j).body(1) ||
-           snakes(i).length >= 2 && snakes(j).head == snakes(i).body(1)
+           snakes(j).length >= 2 && snakes(i).head == snakes(j).body.init.last ||
+           snakes(i).length >= 2 && snakes(j).head == snakes(i).body.init.last
       } yield (i, j)
       if (fighters.length > 1) {
         winner = -2

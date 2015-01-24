@@ -57,6 +57,9 @@ class Snake(position: (Int, Int), val fieldSize: (Int, Int), private var _orient
     if (_food == 0) {
       _body = _body.dequeue._2
     }
+    else {
+      _food -= 1
+    }
   }
 
   def orientation = _orientation
