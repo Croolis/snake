@@ -150,14 +150,13 @@ function game() {
     if (duel_data != null) {
         duel();
     } else {
+        display_field();
         field();
     }
 }
 
 function field() {
     context.clearRect(0, 0, canvas_width, canvas_height);
-
-    display_field();
 
     for (var i = 0; i < snakes.length; i++)
         if (snakes[i] != null)
@@ -200,6 +199,6 @@ function duel() {
     context.strokeRect(canvas_width - bar_width - margin, margin, bar_width, 50);
     context.drawImage(arrow_sprite[duel_data.orient2], canvas_width - margin - bar_width/2 - arrow_size/2, margin + 50 + separator);
 
-    fill_progress_bar(margin, margin, bar_width, 50, left_progress, "red", true);
-    fill_progress_bar(canvas_width - bar_width - margin, margin, bar_width, 50, right_progress, "blue", false);
+    fill_progress_bar(margin, margin, bar_width, 50, Math.min(left_progress, 1), "red", true);
+    fill_progress_bar(canvas_width - bar_width - margin, margin, bar_width, 50, Math.min(right_progress, 1), "blue", false);
 }
