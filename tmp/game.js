@@ -160,8 +160,8 @@ function field() {
     display_field();
 
     for (var i = 0; i < snakes.length; i++)
-        for (var j = 0; j < snakes[i].length; j++)
-            if (snakes[i] != null)
+        if (snakes[i] != null)
+            for (var j = 0; j < snakes[i].length; j++)
                 clear_square(snakes[i][j][0], snakes[i][j][1]);
     for (var i = 0; i < snakes.length; i++) {
         if (snakes[i] != null) {
