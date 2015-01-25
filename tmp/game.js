@@ -52,6 +52,10 @@ snake_sprites.src = "snake2.png";
 // спрайты еды
 var food_sprites = new Image();
 food_sprites.src = "apple.png";
+// спрайты стрелочек для дуэли
+var arrow_sprite = {"Left": new Image(), "Right": new Image(), "Up": new Image(), "Down": new Image()};
+arrow_sprite.Left.src = "left.png"; arrow_sprite.Right.src = "right.png";
+arrow_sprite.Up.src = "up.png"; arrow_sprite.Down.src = "down.png";
 
 var snakes, foods, duel_data;
 
@@ -142,32 +146,39 @@ function display_field() {
     }
 }
 
-function battleground() {
+function game() {
+    if (duel_data != null) {
+        duel();
+    } else {
+        field();
+    }
+}
+
+function field() {
     context.clearRect(0, 0, canvas_width, canvas_height);
 
     display_field();
 
-    if (duel_data != null) {
-        duel();
-    }
-
     for (var i = 0; i < snakes.length; i++)
         for (var j = 0; j < snakes[i].length; j++)
-            clear_square(snakes[i][j][0], snakes[i][j][1]);
+            if (snakes[i] != null)
+                clear_square(snakes[i][j][0], snakes[i][j][1]);
     for (var i = 0; i < snakes.length; i++) {
-        for (var j = 0; j < snakes[i].length; j++) {
-            var hx = 0, hy = 0, tx = 0, ty = 0;
-            if (j != 0) {
-                tx = snakes[i][j - 1][0] - snakes[i][j][0];
-                ty = snakes[i][j - 1][1] - snakes[i][j][1];
+        if (snakes[i] != null) {
+            for (var j = 0; j < snakes[i].length; j++) {
+                var hx = 0, hy = 0, tx = 0, ty = 0;
+                if (j != 0) {
+                    tx = snakes[i][j - 1][0] - snakes[i][j][0];
+                    ty = snakes[i][j - 1][1] - snakes[i][j][1];
+                }
+                 if (j + 1 != snakes[i].length) {
+                    hx = snakes[i][j][0] - snakes[i][j + 1][0];
+                    hy = snakes[i][j][1] - snakes[i][j + 1][1];
+                }
+                var temp_arr = new Array(tx, ty, hx, hy);
+                var type = keys(temp_arr) + ((j + iter_counter) % 2);
+                fill_square(snakes[i][j][0], snakes[i][j][1], type);
             }
-             if (j + 1 != snakes[i].length) {
-                hx = snakes[i][j][0] - snakes[i][j + 1][0];
-                hy = snakes[i][j][1] - snakes[i][j + 1][1];
-            }
-            var temp_arr = new Array(tx, ty, hx, hy);
-            var type = keys(temp_arr) + ((j + iter_counter) % 2);
-            fill_square(snakes[i][j][0], snakes[i][j][1], type);
         }
     }
     for (var i = 0; i < foods.length; i++) {
@@ -180,16 +191,15 @@ function duel() {
     context.clearRect(0, 0, canvas_width, canvas_height);
     // расстояние между bar'ами, отступ между bar'ом и краем, ширина bar'a                
     var separator = 50, margin = 10, bar_width = (canvas_width - separator - 2 * margin) / 2;
-    // эти значения каким-то образом получаются через websocket
-    var left_progress, right_progress;
-    // левый progress bar                
+    var left_progress = duel_data.pow1/100, right_progress = duel_data.pow2/100;
+    var arrow_size = 60;
+    // progress bar и стрелка левого игрока
     context.strokeRect(margin, margin, bar_width, 50);
-    // правый progress bar
+    context.drawImage(arrow_sprite[duel_data.orient1], margin + bar_width/2 - arrow_size/2, margin + 50 + separator);
+    // progress bar и стрелка правого игрока
     context.strokeRect(canvas_width - bar_width - margin, margin, bar_width, 50);
+    context.drawImage(arrow_sprite[duel_data.orient2], canvas_width - margin - bar_width/2 - arrow_size/2, margin + 50 + separator);
 
-    // тестирование progress bar'ов
-    left_progress = 1/2;
-    right_progress = 2/3;
     fill_progress_bar(margin, margin, bar_width, 50, left_progress, "red", true);
     fill_progress_bar(canvas_width - bar_width - margin, margin, bar_width, 50, right_progress, "blue", false);
 }

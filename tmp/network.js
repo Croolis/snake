@@ -14,6 +14,6 @@ timer(4, function() {
         snakes = JSON.parse(event.data).snakes;
         foods = JSON.parse(event.data).food;
         duel_data = JSON.parse(event.data).battle;
-        battleground();
+        game();
     };
 }, false);
