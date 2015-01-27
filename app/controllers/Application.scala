@@ -1,11 +1,19 @@
-import play.api._
-import play.api.libs.iteratee.{Iteratee, Concurrent}
+package controllers
+
+import game._
 import play.api.mvc._
-import scala.concurrent.ExecutionContext.Implicits.global
+import play.api.Play.current
+import play.api.libs.json._
 
-package controllers {
+object Namer {
+  var i = 0
+  val names = Array("Player1", "Player2")
 
-import play.api.libs.json.JsValue
+  def apply() = {
+    i += 1
+    names(i % 2)
+  }
+}
 
 object Application extends Controller {
 
@@ -13,26 +21,8 @@ object Application extends Controller {
     Ok(views.html.index("Hello, world!"))
   }
 
-  def ws = WebSocket.using[JsValue] { request =>
-    var server: GameServer = null
-    var player: Int = -1
-
-    val (out, chan) = Concurrent.broadcast[JsValue]
-    val in = Iteratee.foreach[JsValue](x => {
-      if (server != null) {
-        server.changeDirection(player, x)
-      }
-    })
-
-    GameServer.newGame(chan, { case (srv, plr) => {
-      server = srv
-      player = plr
-    }
-    })
-
-    (in, out)
+  def ws = WebSocket.acceptWithActor[JsValue, JsValue] { request => out =>
+    PlayerConnection.props(out, Player(Namer(), "black"))
   }
-
-}
 
 }

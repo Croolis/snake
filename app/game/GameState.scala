@@ -1,29 +1,32 @@
+package game
+
 import scala.util.Random
-
-package game {
-
 import play.api.libs.json._
 
 /**
  * Describes a state of a game
  */
-class GameState(val playersCount: Int, val width: Int, val height: Int) {
+class GameState(val players: Seq[Player], val width: Int = 40, val height: Int = 20) {
   private final val margin = 5
   private final val initialSnakes = List(new Snake((margin, margin), (width, height), Right),
     new Snake((width - margin, margin), (width, height), Left),
     new Snake((margin, height - margin), (width, height), Right),
     new Snake((width - margin, height - margin), (width, height), Right))
-  private final val foodPower = 3
+  private final val foodPower = 2
+
+  private val playersCount = players.length
 
   private var snakes = initialSnakes take playersCount
-  private var food: List[(Int, Int)] = Nil
+  private var food = List[(Int, Int)]()
   private var battleState: BattleState = null
-  private var winner = -1
+  private var _winner = -1
 
-  def snakesAlive = snakes.withFilter(_ != null)
+  def winner = _winner
+
+  private def snakesAlive = snakes.withFilter(_ != null)
 
   def update(): Unit = {
-    if (winner != -1)
+    if (_winner != -1)
       return
     if (battleState == null) {
       snakesAlive foreach (x => x.move())
@@ -37,7 +40,7 @@ class GameState(val playersCount: Int, val width: Int, val height: Int) {
            snakes(i).length >= 2 && snakes(j).head == snakes(i).body.init.last
       } yield (i, j)
       if (fighters.length > 1) {
-        winner = -2
+        _winner = -2
         snakes = snakes map (x => null)
         return
       }
@@ -70,7 +73,7 @@ class GameState(val playersCount: Int, val width: Int, val height: Int) {
         snakes(alive).feed(snakes(dead).length / 2)
         snakes = (snakes take dead) ++ (null :: (snakes drop (dead + 1)))
         if (snakes.count(_ != null) == 1)
-          winner = snakes.indexWhere(_ != null)
+          _winner = snakes.indexWhere(_ != null)
         battleState = null
       }
       else
@@ -78,11 +81,24 @@ class GameState(val playersCount: Int, val width: Int, val height: Int) {
     }
   }
 
+  def kill(player: Int) = {
+    snakes = (snakes take player) ++ (null :: (snakes drop (player + 1)))
+    if (battleState != null) {
+      if (battleState.s1index == player)
+        battleState = null
+      if (battleState.s2index == player)
+        battleState = null
+    }
+    if (snakes.count(_ != null) == 1)
+      _winner = snakes.indexWhere(_ != null)
+  }
+
   def changeDirection(snake: Int, dir: Orientation) = {
     snakes(snake).changeOrientation(dir)
   }
 
   def serialize() = Json.toJson(Map(
+    "players" -> Json.toJson(players map (p => p.serialize())),
     "snakes" -> Json.toJson(snakes map {
       case null => JsNull
       case x => x.serialize()}),
@@ -91,8 +107,6 @@ class GameState(val playersCount: Int, val width: Int, val height: Int) {
       case bs => bs.serialize()
     }),
     "food" -> Json.toJson(food.map { case (x, y) => Json.toJson(Seq(x, y))}),
-    "winner" -> Json.toJson(winner)
+    "winner" -> Json.toJson(_winner)
   ))
-}
-
 }

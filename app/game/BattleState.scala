@@ -1,7 +1,7 @@
+package game
+
 import scala.util.Random
 import play.api.libs.json._
-
-package game {
 
 class BattleState(val s1index: Int, val s1: Snake, val s2index: Int, val s2: Snake) {
   private final val tick = 5
@@ -36,12 +36,9 @@ class BattleState(val s1index: Int, val s1: Snake, val s2index: Int, val s2: Sna
   def serialize(): JsValue = Json.toJson(Map(
     "snake1" -> Json.toJson(s1index),
     "snake2" -> Json.toJson(s2index),
-    "win" -> Json.toJson(win),
     "pow1" -> Json.toJson(pow1),
     "pow2" -> Json.toJson(pow2),
     "orient1" -> Json.toJson(orient1.toString),
     "orient2" -> Json.toJson(orient2.toString)
   ))
-}
-
 }

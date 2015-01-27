@@ -12843,7 +12843,7 @@
 [0m[[0mdebug[0m] [0m	[NOT REQUIRED] org.scala-sbt#apply-macro;0.13.5!apply-macro.jar[0m
 [0m[[0mdebug[0m] [0m	[NOT REQUIRED] org.scala-lang#jline;2.10.4!jline.jar[0m
 [0m[[0mdebug[0m] [0m	[NOT REQUIRED] org.fusesource.jansi#jansi;1.4!jansi.jar[0m
-[0m[[0mdebug[0m] [0m:: resolution report :: resolve 5904ms :: artifacts dl 106ms[0m
+[0m[[0mdebug[0m] [0m:: resolution report :: resolve 5827ms :: artifacts dl 230ms[0m
 [0m[[0mdebug[0m] [0m	report for default#snake-build;0.1-SNAPSHOT compile produced in /home/norpadon/projects/snake/project/target/resolution-cache/reports/default-snake-build-compile.xml[0m
 [0m[[0mdebug[0m] [0m	report for default#snake-build;0.1-SNAPSHOT runtime produced in /home/norpadon/projects/snake/project/target/resolution-cache/reports/default-snake-build-runtime.xml[0m
 [0m[[0mdebug[0m] [0m	report for default#snake-build;0.1-SNAPSHOT test produced in /home/norpadon/projects/snake/project/target/resolution-cache/reports/default-snake-build-test.xml[0m
@@ -12857,5 +12857,5 @@
 [0m[[0mdebug[0m] [0m	report for default#snake-build;0.1-SNAPSHOT docs produced in /home/norpadon/projects/snake/project/target/resolution-cache/reports/default-snake-build-docs.xml[0m
 [0m[[0mdebug[0m] [0m	report for default#snake-build;0.1-SNAPSHOT pom produced in /home/norpadon/projects/snake/project/target/resolution-cache/reports/default-snake-build-pom.xml[0m
 [0m[[0mdebug[0m] [0m	report for default#snake-build;0.1-SNAPSHOT scala-tool produced in /home/norpadon/projects/snake/project/target/resolution-cache/reports/default-snake-build-scala-tool.xml[0m
-[0m[[0mdebug[0m] [0m	resolve done (5904ms resolve - 106ms download)[0m
+[0m[[0mdebug[0m] [0m	resolve done (5827ms resolve - 230ms download)[0m
 [0m[[0minfo[0m] [0mDone updating.[0m

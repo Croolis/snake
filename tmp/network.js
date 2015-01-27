@@ -1,5 +1,5 @@
 timer(4, function() {
-    var socket = new WebSocket("ws:10.7.20.29:9000/test");
+    var socket = new WebSocket("ws:localhost:9000/test");
 
     socket.onopen = function() {
 

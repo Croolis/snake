@@ -1,40 +1,90 @@
-import play.api.libs.iteratee.Concurrent._
-import play.api.libs.json.JsValue
+package controllers
 
-package controllers {
+import game._
+import collection.mutable.ListBuffer
+import collection.mutable
+import play.api.libs.json._
 
-import game.GameState
+class GameServer(private val players: Array[PlayerConnection]) {
+  private var _alive = true
+  private val gameState = new GameState(players map (_.player))
 
-class GameServer(val players: Array[Channel[JsValue]]) extends Runnable {
-  val gameState = new GameState(2, 40, 20)
+  players foreach (p => {
+    p.onReceive = msg => receive(p.player, msg)
+    p.onClose = () => playerLeave(p.player)
+  })
 
-  def changeDirection(player: Int, direction: JsValue) = {
-    gameState.changeDirection(player, game.Orientation.fromString(direction.toString().tail.init))
+  def alive = _alive
+
+  private def playerLeave(player: Player) = {
+    gameState.kill(players.indexWhere(_.player == player))
+    //TODO: Send message to other players.
   }
 
-  def run() {
-    while (true) {
-      gameState.update()
-      players.zipWithIndex foreach { case (x, y) => x.push(gameState.serialize())}
-      Thread.sleep(250)
-    }
+  private def receive(player: Player, msg: JsValue) = {
+    //TODO: Make message parsing adequate.
+    gameState.changeDirection(players.indexWhere(_.player == player), Orientation.fromString(msg.toString().tail.init))
+  }
+
+  private def sendBroadband(msg: JsValue) = {
+    players foreach (p => p.send(msg))
+  }
+
+  private def tick() = {
+    gameState.update()
+    sendBroadband(gameState.serialize())
+    if (gameState.winner != -1)
+      //TODO: Send GAMEOVER message to players.
+      stop()
+  }
+
+  def stop() = {
+    _alive = false
   }
 }
 
 object GameServer {
-  var playerQueue: List[(Channel[JsValue], (GameServer, Int) => Unit)] = Nil
+  class Ticker(val timing: Int) extends Runnable {
+    private var servers = mutable.MutableList[GameServer]()
+    private var _alive = true
+    val thread = new Thread(this)
+    thread.start()
 
-  def newGame(chan: Channel[JsValue], onGameStart: (GameServer, Int) => Unit) = {
-    playerQueue = (chan, onGameStart) :: playerQueue
-    if (playerQueue.length >= 2) {
-      val (channels, callbacks) = playerQueue.unzip
-      val server = new GameServer(channels.toArray)
-      new Thread(server).start()
-      callbacks.zipWithIndex foreach { case (f, i) => f(server, i)}
-    }
+    def run() =
+      while (_alive) {
+        servers = servers.filter(s => {
+          s.tick()
+          s.alive
+        })
+        Thread.sleep(timing)
+      }
+
+    def kill() =
+      _alive = false
+
+    def add(server: GameServer) =
+      servers += server
+
+    def alive = _alive
+
+    def size = servers.length
   }
-}
 
+  final val timing = 150
+  final var maxServersPerTicker = 4
 
+  private var tickers = ListBuffer(new Ticker(timing))
 
+  def apply(players: Array[PlayerConnection]) = {
+    val server = new GameServer(players)
+    tickers = tickers.filter(_.alive)
+    val minimumLoad = tickers.minBy(_.size)
+    if (minimumLoad.size < maxServersPerTicker)
+      minimumLoad.add(server)
+    else {
+      tickers += new Ticker(timing)
+      tickers.last.add(server)
+    }
+    server
+  }
 }
