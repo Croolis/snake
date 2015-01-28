@@ -23,7 +23,8 @@ class GameServer(private val players: Array[PlayerConnection]) {
 
   private def receive(player: Player, msg: JsValue) = {
     //TODO: Make message parsing adequate.
-    gameState.changeDirection(players.indexWhere(_.player == player), Orientation.fromString(msg.toString().tail.init))
+    if (gameState.players.exists(_ == player))
+      gameState.changeDirection(players.indexWhere(_.player == player), Orientation.fromString(msg.toString().tail.init))
   }
 
   private def sendBroadband(msg: JsValue) = {

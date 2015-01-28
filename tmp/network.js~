@@ -1,5 +1,5 @@
 
-    var socket = new WebSocket("ws:localhost:9000/test");
+    var socket = new WebSocket("ws:172.19.32.247:9000/test");
 
     socket.onopen = function() {
 
