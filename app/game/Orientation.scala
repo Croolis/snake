@@ -34,6 +34,8 @@ object Orientation {
 
   def orientations = List(Left, Right, Up, Down)
 
+  val opposite = Map[Orientation, Orientation](Left -> Right, Right -> Left, Up -> Down, Down -> Up)
+
   def fromString = Map("Left" -> Left, "Right" -> Right, "Up" -> Up, "Down" -> Down)
 }
 

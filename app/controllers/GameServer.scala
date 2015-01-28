@@ -1,5 +1,6 @@
 package controllers
 
+import akka.actor.PoisonPill
 import game._
 import collection.mutable.ListBuffer
 import collection.mutable
@@ -17,14 +18,11 @@ class GameServer(private val players: Array[PlayerConnection]) {
   def alive = _alive
 
   private def playerLeave(player: Player) = {
-    gameState.kill(players.indexWhere(_.player == player))
-    //TODO: Send message to other players.
+    gameState.kill(player.username)
   }
 
   private def receive(player: Player, msg: JsValue) = {
-    //TODO: Make message parsing adequate.
-    if (gameState.players.exists(_ == player))
-      gameState.changeDirection(players.indexWhere(_.player == player), Orientation.fromString(msg.toString().tail.init))
+    gameState.playerAction(player.username, Orientation.fromString(msg.toString().tail.init))
   }
 
   private def sendBroadband(msg: JsValue) = {
@@ -33,19 +31,23 @@ class GameServer(private val players: Array[PlayerConnection]) {
 
   private def tick() = {
     gameState.update()
-    sendBroadband(gameState.serialize())
-    if (gameState.winner != -1)
-      //TODO: Send GAMEOVER message to players.
+    while (gameState.hasMessages)
+      sendBroadband(gameState.popMessage().toJson)
+    if (gameState.gameOver)
       stop()
   }
 
   def stop() = {
     _alive = false
+    players foreach (p => {
+      p.onClose = null
+      p.close()
+    })
   }
 }
 
 object GameServer {
-  class Ticker(val timing: Int) extends Runnable {
+  private class Ticker(val timing: Int) extends Runnable {
     private var servers = mutable.MutableList[GameServer]()
     private var _alive = true
     val thread = new Thread(this)

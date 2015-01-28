@@ -21,6 +21,9 @@ class PlayerConnection(val out: ActorRef, val player: Player) extends Actor {
     }
   }
 
+  def close() =
+    self ! PoisonPill
+
   override def postStop() =
     if (onClose != null)
       onClose()

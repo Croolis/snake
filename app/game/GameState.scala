@@ -1,112 +1,126 @@
 package game
 
+import language.postfixOps
+import scala.collection.mutable
 import scala.util.Random
 import play.api.libs.json._
 
 /**
  * Describes a state of a game
  */
-class GameState(val players: Seq[Player], val width: Int = 40, val height: Int = 20) {
+class GameState(playerSeq: Seq[Player], val width: Int = 40, val height: Int = 20) {
+  // Margin between field border and snake
   private final val margin = 5
+  // Initial snake positions.
   private final val initialSnakes = List(new Snake((margin, margin), (width, height), Right),
-    new Snake((width - margin, margin), (width, height), Left),
-    new Snake((margin, height - margin), (width, height), Right),
-    new Snake((width - margin, height - margin), (width, height), Right))
+                                         new Snake((width - margin, margin), (width, height), Left),
+                                         new Snake((margin, height - margin), (width, height), Right),
+                                         new Snake((width - margin, height - margin), (width, height), Right))
+  // Amount of segments, added to snake after meal.
   private final val foodPower = 2
+  private val players = playerSeq map (_.username) zip initialSnakes toArray
+  // Queue, used to store messages, that should be sent to players.
+  private val messageQueue = mutable.Queue[Message]()
+  // Queue, used to store players, that should fight a duel.
+  private val duelQueue = mutable.Queue[(String, String)]()
+  private var duelState: DuelState = _
+  // Array with food coordinates.
+  private val food = Array((0, 0), (width - 1, 0), (0, height - 1), (width - 1, height - 1)) take players.length
+  private val playerIndex = Map(players: _*)
+  private var _gameOver = false
 
-  private val playersCount = players.length
+  private def sendMessage(msg: Message) =
+    messageQueue.enqueue(msg)
 
-  private var snakes = initialSnakes take playersCount
-  private var food = List[(Int, Int)]()
-  private var battleState: BattleState = null
-  private var _winner = -1
+  private def sendMessage(msg: String, data: JsValue = null) =
+    messageQueue.enqueue(Message(msg, data))
 
-  def winner = _winner
-
-  private def snakesAlive = snakes.withFilter(_ != null)
-
-  def update(): Unit = {
-    if (_winner != -1)
-      return
-    if (battleState == null) {
-      snakesAlive foreach (x => x.move())
-      val fighters = for {
-        i <- 0 until playersCount
-        j <- 0 until playersCount
-        if i < j
-        if snakes(i) != null && snakes(j) != null
-        if snakes(i).head == snakes(j).head ||
-           snakes(j).length >= 2 && snakes(i).head == snakes(j).body.init.last ||
-           snakes(i).length >= 2 && snakes(j).head == snakes(i).body.init.last
-      } yield (i, j)
-      if (fighters.length > 1) {
-        _winner = -2
-        snakes = snakes map (x => null)
-        return
-      }
-      fighters foreach { case (s1, s2) => battleState = new BattleState(s1, snakes(s1), s2, snakes(s2))}
-
-      val cuttings = for {
-        predator <- snakesAlive
-        victim <- snakesAlive
-        if victim.head != predator.head
-        if victim.body.contains(predator.head)
-      } yield (victim, predator)
-      cuttings.foreach({ case (v, p) => p.feed(v.cut(p.head) / 2)})
-
-      snakesAlive foreach (s => {
-        val yumyum = food.indexOf(s.head)
-        if (yumyum != -1) {
-          s.feed(foodPower)
-          food = food.take(yumyum) ++ food.drop(yumyum + 1)
-        }
-      })
-
-      if (food.length < snakes.length)
-        food = (Random.nextInt(width), Random.nextInt(height)) :: food
-    } else {
-      if (battleState.win) {
-        val (alive, dead) = if (battleState.pow1 < battleState.pow2)
-          (battleState.s1index, battleState.s2index)
-        else
-          (battleState.s2index, battleState.s1index)
-        snakes(alive).feed(snakes(dead).length / 2)
-        snakes = (snakes take dead) ++ (null :: (snakes drop (dead + 1)))
-        if (snakes.count(_ != null) == 1)
-          _winner = snakes.indexWhere(_ != null)
-        battleState = null
+  def update(): Unit =
+    if (duelState != null)
+      if (duelState.win) {
+        playerIndex(duelState.winner).feed((playerIndex(duelState.loser).length + 1) / 2)
+        kill(duelState.loser)
+        duelState = null
+        update()
       }
       else
-        battleState.update()
+        sendMessage(duelState.update())
+    else
+    if (duelQueue.nonEmpty) {
+      val (player1, player2) = duelQueue.dequeue()
+      duelState = new DuelState(player1, playerIndex(player1), player2, playerIndex(player2))
+      update()
+    }
+    else if (!gameOver)
+        updateField()
+
+
+  private def updateField(): Unit = {
+    // Move snakes.
+    val snakes = players.unzip._2
+    snakes foreach (_.move())
+    sendMessage("move", Json.toJson(players map {
+      case (player, snake) => {
+        JsObject(Seq(
+          "name" -> JsString(player),
+          "snake" -> snake.toJson
+        ))
+      }
+    }))
+
+    // Find duels.
+    duelQueue.enqueue((for {
+      (player1, snake1) <- players
+      (player2, snake2) <- players
+      if snake2.alive
+      if player1 < player2
+      if (0 to 1) contains snake1.indexOfSegment(snake2.head)
+    } yield (player1, player2)): _*)
+
+    // Find cuts.
+    for {
+      (player1, predator) <- players
+      (player2, victim) <- players
+      pos = victim.indexOfSegment(predator.head)
+      if pos >= 2
+    } {
+      predator.feed((victim.length - pos + 1) / 2)
+      victim.cut(predator.head)
+      sendMessage("cut", JsObject(Seq("predator" -> JsString(player1), "victim" -> JsString(player2))))
+    }
+
+    // Feed snakes.
+    for ((player, snake) <- players) {
+      val index = food indexOf snake.head
+      if (index != -1) {
+        snake.feed(foodPower)
+        food(index) = (Random.nextInt(width), Random.nextInt(height))
+        sendMessage("feed", JsObject(Seq("eater" -> JsString(player))))
+      }
     }
   }
 
-  def kill(player: Int) = {
-    snakes = (snakes take player) ++ (null :: (snakes drop (player + 1)))
-    if (battleState != null) {
-      if (battleState.s1index == player)
-        battleState = null
-      if (battleState.s2index == player)
-        battleState = null
+  def kill(player: String) = {
+    val snake = playerIndex(player)
+    if (snake.alive) {
+      snake.kill()
+      sendMessage("died", JsString(player))
+      if (players.count({ case (p, s) => s.alive }) == 1) {
+        _gameOver = true
+        sendMessage("game over", JsObject(Seq("winner" -> JsString(players.find(_._2.alive).get._1))))
+      }
     }
-    if (snakes.count(_ != null) == 1)
-      _winner = snakes.indexWhere(_ != null)
   }
 
-  def changeDirection(snake: Int, dir: Orientation) = {
-    snakes(snake).changeOrientation(dir)
-  }
+  def playerAction(player: String, action: Orientation) =
+    if (duelState == null)
+      playerIndex(player).changeOrientation(action)
+    else
+      duelState.playerAction(player, action)
 
-  def serialize() = Json.toJson(Map(
-    "players" -> Json.toJson(players map (p => p.serialize())),
-    "snakes" -> Json.toJson(snakes map {
-      case null => JsNull
-      case x => x.serialize()}),
-    "battle" -> (battleState match {
-      case null => JsNull
-      case bs => bs.serialize()
-    }),
-    "food" -> Json.toJson(food.map { case (x, y) => Json.toJson(Seq(x, y))}),
-    "winner" -> Json.toJson(_winner)
-  ))
+  def hasMessages = messageQueue.nonEmpty
+
+  def popMessage() = messageQueue.dequeue()
+
+  def gameOver = _gameOver
 }
