@@ -1,5 +1,5 @@
-timer(4, function() {
-    var socket = new WebSocket("ws:localhost:9000/test");
+
+    var socket = new WebSocket("ws:172.19.32.247:9000/test");
 
     socket.onopen = function() {
 
@@ -10,10 +10,14 @@ timer(4, function() {
     }
 
     socket.onmessage = function(event) {
-        console.log(event)
-        snakes = JSON.parse(event.data).snakes;
-        foods = JSON.parse(event.data).food;
-        duel_data = JSON.parse(event.data).battle;
+        console.log(event);
+        var data = JSON.parse(event.data);
+        players = data.players;
+        winner = data.winner;
+        duel_data = data.battle;
+        if (duel_data != null)
+        	clear_snakes();       
+        snakes = data.snakes;
+        foods = data.food;
         game();
     };
-}, false);
