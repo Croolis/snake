@@ -17,6 +17,9 @@ class GameServer(private val players: Array[PlayerConnection]) {
 
   def alive = _alive
 
+  sendBroadband(Message("game start",
+                        JsObject(players map (p => p.player.username -> JsString(p.player.color)))).toJson)
+
   private def playerLeave(player: Player) = {
     gameState.kill(player.username)
   }
