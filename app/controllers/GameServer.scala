@@ -1,6 +1,5 @@
 package controllers
 
-import akka.actor.PoisonPill
 import game._
 import collection.mutable.ListBuffer
 import collection.mutable
@@ -20,17 +19,14 @@ class GameServer(private val players: Array[PlayerConnection]) {
   sendBroadband(Message("game start",
                         JsObject(players map (p => p.player.username -> JsString(p.player.color)))).toJson)
 
-  private def playerLeave(player: Player) = {
+  private def playerLeave(player: Player) =
     gameState.kill(player.username)
-  }
 
-  private def receive(player: Player, msg: JsValue) = {
+  private def receive(player: Player, msg: JsValue) =
     gameState.playerAction(player.username, Orientation.fromString(msg.toString().tail.init))
-  }
 
-  private def sendBroadband(msg: JsValue) = {
+  private def sendBroadband(msg: JsValue) =
     players foreach (p => p.send(msg))
-  }
 
   private def tick() = {
     gameState.update()
