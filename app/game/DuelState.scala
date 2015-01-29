@@ -40,7 +40,7 @@ class DuelState(val player1: String, val snake1: Snake, val player2: String, val
 
   def winner = if (pow1 > pow2) player1 else player2
 
-  def loser = if (pow2 >= pow1) player2 else player1
+  def loser = if (pow2 > pow1) player2 else player1
 
   def update(): Message = {
     _pow1 += inc
