@@ -5,9 +5,6 @@ import scala.collection.mutable
 import scala.util.Random
 import play.api.libs.json._
 
-/**
- * Describes a state of a game
- */
 class GameState(playerSeq: Seq[Player], val width: Int = 40, val height: Int = 20) {
   // Margin between field border and snake
   private val margin = 5

@@ -1,4 +1,4 @@
-package game {
+package game
 
 sealed abstract class Orientation
 
@@ -37,6 +37,4 @@ object Orientation {
   val opposite = Map[Orientation, Orientation](Left -> Right, Right -> Left, Up -> Down, Down -> Up)
 
   def fromString = Map("Left" -> Left, "Right" -> Right, "Up" -> Up, "Down" -> Down)
-}
-
 }

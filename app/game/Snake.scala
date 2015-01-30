@@ -3,9 +3,6 @@ package game
 import scala.collection.mutable
 import play.api.libs.json._
 
-/**
- * Describes state fo a snake
- */
 class Snake(position: (Int, Int),
             private val fieldSize: (Int, Int),
             private var _orientation: Orientation) {
