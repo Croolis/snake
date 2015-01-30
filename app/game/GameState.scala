@@ -106,12 +106,12 @@ class GameState(playerSeq: Seq[Player], val width: Int = 40, val height: Int = 2
       if (index != -1) {
         snake.feed(foodPower)
         food(index) = (Random.nextInt(width), Random.nextInt(height))
-        sendMessage("apple eaten", JsObject(Seq("eater" -> JsString(player))))
+        sendMessage("apple eaten", JsString(player))
       }
       if (mouse != null && mouse.position == snake.head) {
         mouse = null
         snake.feed(mousePower)
-        sendMessage("mouse eaten", JsObject(Seq("eater" -> JsString(player))))
+        sendMessage("mouse eaten", JsString(player))
       }
     }
 
@@ -127,7 +127,7 @@ class GameState(playerSeq: Seq[Player], val width: Int = 40, val height: Int = 2
       sendMessage("died", JsString(player))
       if (players.count({ case (p, s) => s.alive }) == 1) {
         _gameOver = true
-        sendMessage("game over", JsObject(Seq("winner" -> JsString(players.find(_._2.alive).get._1))))
+        sendMessage("game over", JsString(players.find(_._2.alive).get._1))
       }
     }
   }

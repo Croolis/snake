@@ -4,7 +4,6 @@ import game._
 import collection.mutable.ListBuffer
 import collection.mutable
 import play.api.libs.json._
-
 import scala.util.Random
 
 class GameServer(private val players: Array[PlayerConnection]) {
