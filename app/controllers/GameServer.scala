@@ -5,19 +5,25 @@ import collection.mutable.ListBuffer
 import collection.mutable
 import play.api.libs.json._
 
-class GameServer(private val players: Array[PlayerConnection]) {
-  private var _alive = true
-  private val gameState = new GameState(players map (_.player))
+import scala.util.Random
 
-  players foreach (p => {
+class GameServer(private val players: Array[PlayerConnection]) {
+  players foreach
+  (p => {
     p.onReceive = msg => receive(p.player, msg)
     p.onClose = () => playerLeave(p.player)
+    if (players.count(_.player.username == p.player.username) > 1)
+      p.rename(p.player.username + (2 ^ 10 + Random.nextInt(2 ^ 10)).toString)
+    p.send(Message("your name", JsString(p.player.username)))
   })
+
+  private var _alive = true
+  private val gameState = new GameState(players map (_.player))
 
   def alive = _alive
 
   sendBroadband(Message("game start",
-                        JsObject(players map (p => p.player.username -> JsString(p.player.color)))).toJson)
+                        JsArray(players map (p => p.player.toJson))))
 
   private def playerLeave(player: Player) =
     gameState.kill(player.username)
@@ -31,7 +37,7 @@ class GameServer(private val players: Array[PlayerConnection]) {
   private def tick() = {
     gameState.update()
     while (gameState.hasMessages)
-      sendBroadband(gameState.popMessage().toJson)
+      sendBroadband(gameState.popMessage())
     if (gameState.gameOver)
       stop()
   }

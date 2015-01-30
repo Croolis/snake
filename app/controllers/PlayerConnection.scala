@@ -8,7 +8,7 @@ object PlayerConnection {
   def props(out: ActorRef, player: Player) = Props(new PlayerConnection(out, player))
 }
 
-class PlayerConnection(val out: ActorRef, val player: Player) extends Actor {
+class PlayerConnection(private val out: ActorRef, private var _player: Player) extends Actor {
   GameLobby.newGame(this)
 
   var onReceive: (JsValue => Unit) = _
@@ -27,6 +27,11 @@ class PlayerConnection(val out: ActorRef, val player: Player) extends Actor {
   override def postStop() =
     if (onClose != null)
       onClose()
+
+  def rename(name: String) =
+    _player = Player(name, _player.color)
+
+  def player = _player
 
   def send(msg: JsValue) = out ! msg
 }
