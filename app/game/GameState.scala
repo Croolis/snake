@@ -10,22 +10,30 @@ import play.api.libs.json._
  */
 class GameState(playerSeq: Seq[Player], val width: Int = 40, val height: Int = 20) {
   // Margin between field border and snake
-  private final val margin = 5
+  private val margin = 5
   // Initial snake positions.
-  private final val initialSnakes = List(new Snake((margin, margin), (width, height), Right),
-                                         new Snake((width - margin, margin), (width, height), Left),
-                                         new Snake((margin, height - margin), (width, height), Right),
-                                         new Snake((width - margin, height - margin), (width, height), Right))
-  // Amount of segments, added to snake after meal.
-  private final val foodPower = 2
+  private val initialSnakes = List(new Snake((margin, margin), (width, height), Right),
+                                   new Snake((width - margin, margin), (width, height), Left),
+                                   new Snake((margin, height - margin), (width, height), Right),
+                                   new Snake((width - margin, height - margin), (width, height), Right))
+  // Amount of segments, added to snake after eating an apple.
+  private val foodPower = 2
+  // Amount of segments, added to snake after eating a mouse.
+  private val mousePower = 5
+  // Value, which is inversely proportional to the probability of mouse spawn.
+  private val mouseSpawnPeriod = 20
+  // Collection of pairs (Player, Snake)
   private val players = playerSeq map (_.username) zip initialSnakes toArray
   // Queue, used to store messages, that should be sent to players.
   private val messageQueue = mutable.Queue[Message]()
   // Queue, used to store players, that should fight a duel.
   private val duelQueue = mutable.Queue[(String, String)]()
+  // Current duel
   private var duelState: DuelState = _
   // Array with food coordinates.
   private val food = Array((0, 0), (width - 1, 0), (0, height - 1), (width - 1, height - 1)) take players.length
+  private var mouse: Mouse = _
+  // Map, used to find player's snake efficiently
   private val playerIndex = Map(players: _*)
   private var _gameOver = false
 
@@ -52,21 +60,27 @@ class GameState(playerSeq: Seq[Player], val width: Int = 40, val height: Int = 2
       update()
     }
     else if (!gameOver)
-        updateField()
+      updateField()
 
 
   private def updateField(): Unit = {
     // Move snakes.
     val snakes = players.unzip._2
     snakes foreach (_.move())
-    sendMessage("move", Json.toJson(players map {
-      case (player, snake) => {
-        JsObject(Seq(
-          "name" -> JsString(player),
-          "snake" -> snake.toJson
-        ))
-      }
-    }))
+    if (mouse != null)
+      mouse.move()
+
+    sendMessage("move", Json.toJson(
+      (Seq(mouse) filter (_ != null) map (m => JsObject(Seq("mouse" -> m.toJson)))) ++
+      (food map (a => JsObject(Seq("apple" -> Json.toJson(Seq(a._1, a._2)))))) ++
+      (players map {
+        case (player, snake) => {
+          JsObject(Seq("player" -> JsObject(Seq(
+            "name" -> JsString(player),
+            "snake" -> snake.toJson
+          ))))
+        }
+      })))
 
     // Find duels.
     duelQueue.enqueue((for {
@@ -95,9 +109,18 @@ class GameState(playerSeq: Seq[Player], val width: Int = 40, val height: Int = 2
       if (index != -1) {
         snake.feed(foodPower)
         food(index) = (Random.nextInt(width), Random.nextInt(height))
-        sendMessage("feed", JsObject(Seq("eater" -> JsString(player))))
+        sendMessage("apple eaten", JsObject(Seq("eater" -> JsString(player))))
+      }
+      if (mouse != null && mouse.position == snake.head) {
+        mouse = null
+        snake.feed(mousePower)
+        sendMessage("mouse eaten", JsObject(Seq("eater" -> JsString(player))))
       }
     }
+
+    // Spawn mouse
+    if (mouse == null && Random.nextInt(mouseSpawnPeriod) == 0)
+      mouse = new Mouse(snakes, (width, height), (Random.nextInt(width), Random.nextInt(height)))
   }
 
   def kill(player: String) = {
