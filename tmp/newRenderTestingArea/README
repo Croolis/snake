@@ -1,0 +1,4 @@
+1) запустить сервер в данной директории:
+python server.py
+2) открыть в браузере http://localhost:8080/pros.html
+

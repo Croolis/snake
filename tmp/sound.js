@@ -47,7 +47,7 @@ BufferLoader.prototype.load = function() {
     this.loadBuffer(this.urlList[i], i);
 }
 
-window.onload = init;
+//window.onload = init;
 var soundContext; 
 var bufferLoader;
 

@@ -1,0 +1,94 @@
+<html>
+<head>
+</head>
+<body>
+<script>
+
+function BufferLoader(soundContext, urlList, callback) { // загрузчик звуков
+    this.soundContext = soundContext;
+    this.urlList = urlList;
+    this.onload = callback;
+    this.bufferList = new Array();
+    this.loadCount = 0;
+}
+
+BufferLoader.prototype.loadBuffer = function(url, index) {
+                                    // асинхронно подкачиваем файлы
+    var request = new XMLHttpRequest();
+    request.open("GET", url, true);
+    request.responseType = "arraybuffer";
+
+    var loader = this;
+
+    request.onload = function() {
+                                    // декодируем данные
+        loader.soundContext.decodeAudioData(
+            request.response,
+            function(buffer) {
+            if (!buffer) {
+                alert('error decoding file data: ' + url);
+                return;
+            }
+            loader.bufferList[index] = buffer;
+            if (++loader.loadCount == loader.urlList.length)
+                loader.onload(loader.bufferList);
+            },
+            function(error) {
+                console.error('decodeAudioData error', error);
+            }
+        );
+    }   
+
+    request.onerror = function() {
+        alert('BufferLoader: XHR error');
+    }
+
+    request.send();
+}
+
+BufferLoader.prototype.load = function() {
+    for (var i = 0; i < this.urlList.length; ++i)
+    this.loadBuffer(this.urlList[i], i);
+}
+
+window.onload = init;
+var soundContext; 
+var bufferLoader;
+
+function init() {  // запуск загрузки звуков
+    window.AudiosoundContext = window.AudiosoundContext || window.webkitAudiosoundContext;
+    soundContext = new AudioContext();
+
+    bufferLoader = new BufferLoader(
+        soundContext, 
+        [
+                                                        //список необходимых звуков 
+          'http://localhost:8080/nyam.mp3', 
+          'http://localhost:8080/nyam2.mp3', 
+//          'http://localhost:8080/sound2.mp3',
+        ],
+        finishedLoading  // callback
+    );
+
+    bufferLoader.load();
+}
+
+var soundBuffer; // массив загруженных звуков
+
+function finishedLoading(bufferList) { // записать в массив после загрузки
+  soundBuffer = bufferList;
+}
+
+// воспроизводит звук. Sound - объект из soundbuffer
+function playSound(sound) {
+    var source = soundContext.createBufferSource();
+    source.buffer = sound;
+    source.connect(soundContext.destination);
+    source.start(0);
+}
+
+
+</script>
+</body>
+
+</html>
