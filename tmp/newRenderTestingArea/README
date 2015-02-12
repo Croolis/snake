@@ -1,4 +1,2 @@
-1) запустить сервер в данной директории:
-python server.py
-2) открыть в браузере http://localhost:8080/pros.html
-
+1) запустить python -m SimpleHTTPServer 8080
+2) перейти на http://127.0.0.1:8080/pros.html
