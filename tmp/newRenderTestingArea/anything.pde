@@ -1,5 +1,5 @@
-float coord[][] = new float[0][0];
-float realCor[][];
+float[][] coord = new float[0][0];
+float[][] realCor;
 float segLength = 10;
 PImage a;
 
@@ -8,9 +8,64 @@ int nX, nY;
 int delay = 10;
 int NN=200;
 
+class snake {
+    float[][] realCor;
+    color c;
+    snake(int size) {
+        realCor = new float[size][2];
+        for(int i = 0; i < size; i++) {
+            realCor[i][0] = 0;
+            realCor[i][1] = 0;
+        }
+        c = color(255, 255, 0, 255);
+    }
+
+    void drawSnake() {
+        noFill();
+        stroke( c );
+        strokeWeight(10);
+        strokeJoin(ROUND);
+        beginShape();
+        for(int i = 0; i < realCor.length()-1; i++) {
+            vertex(realCor[i][0], realCor[i][1]);
+            vertex(realCor[i+1][0], realCor[i+1][1]);
+        }
+        endShape();
+    }
+
+    void correct(float[][] coords) {
+        if(coords.length()>realCor.length()) {
+            float tx = realCor[realCor.length()-1][0];
+            float ty = realCor[realCor.length()-1][1];
+            float[] tar = new float[2];
+            tar[0] = tx;
+            tar[1] = ty;
+    
+            while(coords.length()>realCor.length()) {
+                append(realCor, tar);
+            }
+        }
+        if(coords.length()<realCor.length() && coords.length()!=0) {
+            while(coords.length()<realCor.length()) {
+                realCor = subset(realCor, 1);
+
+            }
+//            println(coords.length());
+//            println(realCor.length());
+        }
+        for(int i = 0; i < coords.length(); i++) {
+            realCor[i][0] += (coords[i][0]-realCor[i][0])/delay;
+            realCor[i][1] += (coords[i][1]-realCor[i][1])/delay;
+        }
+    }
+}
+
+snake sn1;
+
 void setup() {
-  size(500, 500);
-  smooth();
+    size(500, 500);
+    smooth();
+    sn1 = new snake(10);
   
 }
 
@@ -19,13 +74,15 @@ void draw() {
     //X+=(nX-X)/delay;
     //Y+=(nY-Y)/delay;
     //realCor = new float[coord.length()][2];
-    for(int i = 0; i < coord.length(); i++) {
-        realCor[i][0] += (coord[i][0]-realCor[i][0])/delay;
-        realCor[i][1] += (coord[i][1]-realCor[i][1])/delay;
-    }
-    drawSnake(realCor);
+    //for(int i = 0; i < coord.length(); i++) {
+    //    realCor[i][0] += (coord[i][0]-realCor[i][0])/delay;
+    //    realCor[i][1] += (coord[i][1]-realCor[i][1])/delay;
+    //}
+    sn1.correct(coord);
+    sn1.drawSnake();
 }
 
+/*
 void drawSnake(float[][] snake) {
     noFill();
     color c = color(255, 255, 0, 255);
@@ -39,7 +96,7 @@ void drawSnake(float[][] snake) {
         vertex(snake[i+1][0], snake[i+1][1]);
     }
     endShape();
-}
+}*/
 
 /*
 
