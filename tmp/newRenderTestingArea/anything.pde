@@ -1,7 +1,8 @@
-float[][] coord = new float[0][0];
-float[][] realCor;
-float segLength = 10;
-PImage a;
+float[][][] coord = new float[0][0][0];
+
+float segLength = 10; // длина
+float mapSize = 20;
+float areaSize = 30;
 
 int X, Y;
 int nX, nY;
@@ -20,6 +21,10 @@ class snake {
         c = color(255, 255, 0, 255);
     }
 
+    void setColor(int R, int G, int B) {
+        c = color(R, G, B, 255);
+    }
+
     void drawSnake() {
         noFill();
         stroke( c );
@@ -27,8 +32,8 @@ class snake {
         strokeJoin(ROUND);
         beginShape();
         for(int i = 0; i < realCor.length()-1; i++) {
-            vertex(realCor[i][0], realCor[i][1]);
-            vertex(realCor[i+1][0], realCor[i+1][1]);
+            vertex((realCor[i][0]-1)*mapSize, (realCor[i][1]-1)*mapSize);
+            vertex((realCor[i+1][0]-1)*mapSize, (realCor[i+1][1]-1)*mapSize);
         }
         endShape();
     }
@@ -50,8 +55,6 @@ class snake {
                 realCor = subset(realCor, 1);
 
             }
-//            println(coords.length());
-//            println(realCor.length());
         }
         for(int i = 0; i < coords.length(); i++) {
             realCor[i][0] += (coords[i][0]-realCor[i][0])/delay;
@@ -60,116 +63,67 @@ class snake {
     }
 }
 
-snake sn1;
+class food {
+    float[][] coords;
+    PImage sprite;
+    food() {
+        coords = new float[0][0];
+        sprite = loadImage("apple.png");
+    }
+    void setCoords(float[][] c) {
+        coords = c;
+    }
+    void draw() {
+        for(int i = 0; i < coords.length(); i++) {
+            image(sprite, coords[i][0]*mapSize-3*mapSize/2, coords[i][1]*mapSize-3*mapSize/2);
+        }
+    }
+}
+
+void drawField() {
+    stroke( color(130, 130, 130) );
+    strokeWeight(1);
+    for(int i = 0; i < areaSize; i++) {
+        line(i*mapSize, 0, i*mapSize, areaSize*mapSize);
+    }
+    for(int i = 0; i < areaSize; i++) {
+        line(0, i*mapSize, areaSize*mapSize, i*mapSize);
+    }
+}
+
+snake[] snakes = new snake[0];
+food foods;
 
 void setup() {
-    size(500, 500);
+    size(mapSize*areaSize, mapSize*areaSize);
+    foods = new food();
     smooth();
-    sn1 = new snake(10);
-  
 }
 
 void draw() {
-    background(226);
-    //X+=(nX-X)/delay;
-    //Y+=(nY-Y)/delay;
-    //realCor = new float[coord.length()][2];
-    //for(int i = 0; i < coord.length(); i++) {
-    //    realCor[i][0] += (coord[i][0]-realCor[i][0])/delay;
-    //    realCor[i][1] += (coord[i][1]-realCor[i][1])/delay;
-    //}
-    sn1.correct(coord);
-    sn1.drawSnake();
-}
-
-/*
-void drawSnake(float[][] snake) {
-    noFill();
-    color c = color(255, 255, 0, 255);
-    stroke( c );
-    strokeWeight(10);
-    strokeJoin(ROUND);
-    beginShape();
-    for(int i = 0; i < snake.length()-1; i++) {
-        //line(snake[i][0], snake[i][1], snake[i+1][0], snake[i+1][1]);
-        vertex(snake[i][0], snake[i][1]);
-        vertex(snake[i+1][0], snake[i+1][1]);
-    }
-    endShape();
-}*/
-
-/*
-
-void dragSegment(int i, float xin, float yin) {
-  float dx = xin - realx[i];
-  float dy = yin - realy[i];
-  float angle = atan2(dy, dx);  
-  realx[i] = xin - cos(angle) * segLength;
-  realy[i] = yin - sin(angle) * segLength;
-  //stroke(23, 79, 4, 220);
-  
-  pushMatrix();
-  translate(realx[i], realy[i]);
-  rotate(angle);
-  
-  color c;
-  
-  if ( i % 3 == 1 )
-    c = color(0, 0, 0, 255);
-  else if ( i % 3 == 2 )
-    c = color(255, 255, 0, 255);
-  else
-    c = color(255, 0, 0, 255);
-
-  stroke( c );
-  strokeWeight(10);
-  line(0, 0, segLength, 0);
-  
-  if ( i == realx.length - 1 )
-  {
-    fill( c );
-    noStroke();
-    beginShape(TRIANGLES);
-    vertex(0, 5);
-    vertex(-2 * segLength, 0);
-    vertex(0, -5);
-    endShape();
-  }
-  
-  if ( i == 0 )
-  {
-   // stroke(0, 255);
-   noStroke();
-   fill(0, 255);
-   ellipse(segLength, -2, 3, 3);
-   ellipse(segLength, 2, 3, 3);
-    //point(segLength, -2);
-    //point(segLength, 2);
-  }
-  
-  popMatrix();
-}
-
-
-void mouseMoved(){
-  nX = mouseX;
-  nY = mouseY;  
-}*/
-
-void ini(int size) {
-    realCor = new float[size][2];
-    for(int i = 0; i < size; i++) {
-        realCor[i][0] = 0;
-        realCor[i][1] = 0;
-    }
-    
-}
-
-void setCoords(int size, float[][] data) {
-    coord = new float[size][2];
-    for(int i = 0; i < size; i++) {
-        coord[i][0] = data[i][0];
-        coord[i][1] = data[i][1];
+    background(238, 209, 105);
+    drawField();
+    foods.draw();
+    for(int i = 0; i < snakes.length(); i++) {
+        if(coord.length()>0) {
+            snakes[i].correct(coord[i]);
+            snakes[i].drawSnake();  
+        }
     }
 }
 
+void setCoords(float[][][] data) {
+    coord = data;
+}
+
+void setFood(float[][] data) {
+    foods.setCoords(data);
+}
+
+void init(int sizeOfSnakes, int[][] colors) {
+    snakes = new snake[sizeOfSnakes];
+    for(int i = 0; i < sizeOfSnakes; i++) {
+        snakes[i] = new snake(2);
+        snakes[i].setColor(colors[i][0], colors[i][1], colors[i][2]);
+    }
+}
