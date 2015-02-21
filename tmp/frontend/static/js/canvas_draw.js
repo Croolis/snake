@@ -40,14 +40,14 @@
                 "head_right_0":      [0,  6],
                 "head_right_1":      [0,  7],
 
-                "body_up_0":         [1,  0],
-                "body_up_1":         [1,  1],
-                "body_down_0":       [1,  2],
-                "body_down_1":       [1,  3],
-                "body_left_0":       [1,  4],
-                "body_left_1":       [1,  5],
-                "body_right_0":      [1,  6],
-                "body_right_1":      [1,  7],
+                "body_down_0":       [1,  0],
+                "body_down_1":       [1,  1],
+                "body_up_0":         [1,  2],
+                "body_up_1":         [1,  3],
+                "body_right_0":      [1,  4],
+                "body_right_1":      [1,  5],
+                "body_left_0":       [1,  6],
+                "body_left_1":       [1,  7],
 
                 "tail_up_0":         [2,  0],
                 "tail_up_1":         [2,  1],
@@ -89,14 +89,14 @@
                 "head_right_0":      [3,  6],
                 "head_right_1":      [3,  7],
 
-                "body_up_0":         [4,  0],
-                "body_up_1":         [4,  1],
-                "body_down_0":       [4,  2],
-                "body_down_1":       [4,  3],
-                "body_left_0":       [4,  4],
-                "body_left_1":       [4,  5],
-                "body_right_0":      [4,  6],
-                "body_right_1":      [4,  7],
+                "body_down_0":       [4,  0],
+                "body_down_1":       [4,  1],
+                "body_up_0":         [4,  2],
+                "body_up_1":         [4,  3],
+                "body_right_0":      [4,  4],
+                "body_right_1":      [4,  5],
+                "body_left_0":       [4,  6],
+                "body_left_1":       [4,  7],
 
                 "tail_up_0":         [5,  0],
                 "tail_up_1":         [5,  1],
@@ -138,14 +138,14 @@
                 "head_right_0":      [6,  6],
                 "head_right_1":      [6,  7],
 
-                "body_up_0":         [7,  0],
-                "body_up_1":         [7,  1],
-                "body_down_0":       [7,  2],
-                "body_down_1":       [7,  3],
-                "body_left_0":       [7,  4],
-                "body_left_1":       [7,  5],
-                "body_right_0":      [7,  6],
-                "body_right_1":      [7,  7],
+                "body_down_0":       [7,  0],
+                "body_down_1":       [7,  1],
+                "body_up_0":         [7,  2],
+                "body_up_1":         [7,  3],
+                "body_right_0":      [7,  4],
+                "body_right_1":      [7,  5],
+                "body_left_0":       [7,  6],
+                "body_left_1":       [7,  7],
 
                 "tail_up_0":         [8,  0],
                 "tail_up_1":         [8,  1],
@@ -327,10 +327,10 @@
                     type = 'tail_' + resolve_direction(position) + '_' + number;
                     fill_square_from_sprite(snake[i], color, phase, type);
                 } else {
-                    position = [-snake[i - 1][0] + snake[i][0],
-                                -snake[i - 1][1] + snake[i][1],
-                                -snake[i + 1][0] + snake[i][0],
-                                -snake[i + 1][1] + snake[i][1]
+                    position = [snake[i - 1][0] - snake[i][0],
+                                snake[i - 1][1] - snake[i][1],
+                                snake[i + 1][0] - snake[i][0],
+                                snake[i + 1][1] - snake[i][1]
                     ];
                     type = 'body_' + resolve_direction(position) + '_' + number;
                     fill_square_from_sprite(snake[i], color, phase, type);
