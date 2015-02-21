@@ -13,16 +13,16 @@
         <script type="text/javascript">
             var drawer = new canvas_draw.FieldDrawer(document.getElementById("playground"), 20, 30, 20, 1, function () {
                 drawer.draw_loading_screen('Connecting...', 1);
-                network.init();
-                network.socket.onmessage = function (event, data) {};
-                network.socket.onopen = function (e) {
+                var socket = new network.SocketConnection();
+                socket.on_message = function (e, d) {};
+                socket.on_open = function (e) {
                     drawer.reset_field();
                     drawer.draw_snake([[1, 2], [1, 3], [2, 3], [3, 3], [4, 3], [5, 3], [6, 3], [6, 4], [6, 5]], 2, [110, 0, 0]);
                 };
-                network.socket.onerror = function (e) {
+                socket.on_error = function (e) {
                     drawer.draw_loading_screen('Connection error!', 0);
                 };
-                network.socket.onclose = function (event) {
+                socket.on_close = function (e) {
                     drawer.draw_loading_screen('Connection failure!', 0);
                 };
             });

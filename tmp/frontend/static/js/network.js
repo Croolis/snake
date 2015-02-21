@@ -1,9 +1,4 @@
 (function () {
-    // Private variable definitions
-    // ============================
-
-    var socket_connection_init = false;
-
 
     // Variable definitions
     // ====================
@@ -11,30 +6,25 @@
     // API namespace `network`
     var network = this.network = {};
 
+    network.SocketConnection = function (destination) {
+        var self = this;
 
-    // Static functions definitions
-    // ============================
-
-    // Init new connection
-    network.init = function (destination) {
         destination = typeof destination === "undefined" ? "ws:localhost:9000/test" : destination;
-        if (!socket_connection_init) {
-            var socket = network.socket = new WebSocket(destination);
-            socket.onopen = network.onopen;
-        } else {
-            console.log('Connection is already established! `init()` call is not allowed!')
-        }
+        var socket = new WebSocket(destination);
+
+        // Wrapper for sending data
+        var send = self.send = function (data) {
+            socket.send(JSON.stringify(data));
+        };
+
+        self.on_message = function () {};
+        self.on_open = function () {};
+        self.on_error = function () {};
+        self.on_close = function () {};
+
+        socket.onmessage = function (e) {self.on_message(e, JSON.parse(e.data))};
+        socket.onopen = function (e) {self.on_open(e)};
+        socket.onerror = function (e) {self.on_error(e)};
+        socket.onclose = function (e) {self.on_close(e)};
     };
-
-    // Wrapper for sending data
-    network.send = function (data) {
-        socket.send(JSON.stringify(data));
-    };
-
-    // Network API functions
-//    network.onmessage = function () {};
-//    network.onopen = function () {};
-//    network.onerror = function () {};
-//    network.onclose = function () {};
-
 })();
