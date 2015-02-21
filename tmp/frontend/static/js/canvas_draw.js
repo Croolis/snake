@@ -228,12 +228,13 @@
 //                delete cached_colored_snake_sprites[String(color)];
 //        };
 
-        // Returns recolored sprite.
+        // Returns recolored and resized sprite.
         var get_or_create_color = this.get_or_create_color = function(color) {
             if (typeof cached_colored_snake_sprites[String(color)] !== "undefined")
                 return cached_colored_snake_sprites[String(color)];
             else
-                return cached_colored_snake_sprites[String(color)] = canvas_draw.recolor_image(snake_sprite, color);
+                return cached_colored_snake_sprites[String(color)] =
+                    canvas_draw.antialiasing(canvas_draw.recolor_image(snake_sprite, color));
         };
         
         // Drawing sprites
@@ -355,6 +356,7 @@
     // Static functions definitions
     // ============================
 
+    // Changes color of an image
     canvas_draw.recolor_image = function (sprite, color, static_mappings, color_barrier) {
         static_mappings = typeof static_mappings === "undefined" ? {} : color_barrier;
         color_barrier = typeof color_barrier === "undefined" ? 50 : color_barrier;
@@ -388,12 +390,33 @@
             }
         }
 
-        temp_canvas = document.createElement('canvas');
-        temp_canvas.height = sprite.height;
-        temp_canvas.width = sprite.width;
-        temp_context = temp_canvas.getContext('2d');
         temp_context.putImageData(imageData, 0, 0);
         return temp_canvas;
     };
+
+    // Applies antialiasing
+    canvas_draw.antialiasing = function (sprite, hardness) {
+        hardness = typeof hardness === "undefined" ? 0.65 : hardness;
+        if (hardness > 1) hardness = 1;
+        if (hardness < 0) hardness = 0;
+        var temp_canvas = document.createElement('canvas'),
+            temp_context = temp_canvas.getContext('2d');
+
+        temp_canvas.width = sprite.width * hardness;
+        temp_canvas.height = sprite.height * hardness;
+
+        temp_context.drawImage(sprite, 0, 0, temp_canvas.width, temp_canvas.height);
+        temp_context.drawImage(temp_canvas, 0, 0, temp_canvas.width * hardness, temp_canvas.height * hardness);
+
+        var return_canvas = document.createElement('canvas'),
+            return_context = return_canvas.getContext('2d');
+
+        return_canvas.width = sprite.width;
+        return_canvas.height = sprite.height;
+
+        return_context.drawImage(temp_canvas, 0, 0, temp_canvas.width * hardness, temp_canvas.height * hardness, 0, 0, return_canvas.width, return_canvas.height);
+
+        return return_canvas;
+    }
 
 })();
