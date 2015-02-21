@@ -7,17 +7,17 @@
     <body>
         <canvas id='playground'></canvas>
 
-        <script type="text/javascript" src="static/js/network.js"></script>
-        <script type="text/javascript" src="static/js/canvas_draw.js"></script>
+        <script type="text/javascript" src="static/js/network_controller.js"></script>
+        <script type="text/javascript" src="static/js/canvas_controller.js"></script>
 
         <script type="text/javascript">
-            var drawer = new canvas_draw.FieldDrawer(document.getElementById("playground"), 20, 30, 20, 1, function () {
+            var drawer = new canvas_controller.FieldDrawer(document.getElementById("playground"), 20, 30, 20, 1, function () {
                 drawer.draw_loading_screen('Connecting...', 1);
-                var socket = new network.SocketConnection();
+                var socket = new network_controller.SocketConnection();
                 socket.on_message = function (e, d) {};
                 socket.on_open = function (e) {
                     drawer.reset_field();
-                    drawer.draw_snake([[1, 2], [1, 3], [2, 3], [3, 3], [4, 3], [5, 3], [6, 3], [6, 4], [6, 5]], 2, [110, 0, 0]);
+                    drawer.draw_snake([[1, 2], [1, 3], [2, 3], [3, 3], [4, 3], [5, 3], [6, 3], [6, 4], [6, 5]], 0, [110, 0, 0]);
                 };
                 socket.on_error = function (e) {
                     drawer.draw_loading_screen('Connection error!', 0);

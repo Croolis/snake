@@ -3,16 +3,17 @@
     // ====================
 
     // API namespace `draw`
-    var canvas_draw = this.canvas_draw = {};
+    this.canvas_controller = {};
 
 
     // Class for drawing field
-    canvas_draw.FieldDrawer = function (canvas, h_amount, w_amount, size, border, onload_callback) {
+    canvas_controller.FieldDrawer = function (canvas, h_amount, w_amount, size, border, onload_callback) {
+        var self = this;
 
         // Variable definitions
         // --------------------
 
-        var context = this.context = canvas.getContext('2d');
+        var context = canvas.getContext('2d');
         context.textBaseline = "middle";
         context.textAlign = "center";
 
@@ -201,51 +202,51 @@
 
         // Caching colored images
 
-//        var cache_new_color = this.cache_new_color = function (color) {
+//        self.cache_new_color = function (color) {
 //            if (typeof cached_colored_snake_sprites[String(color)] !== "undefined")
-//                cached_colored_snake_sprites[String(color)] = canvas_draw.recolor_image(snake_sprite, color);
+//                cached_colored_snake_sprites[String(color)] = canvas_controller.recolor_image(snake_sprite, color);
 //        };
 //
-//        var uncache_new_color = this.uncache_new_color = function (color) {
+//        self.uncache_new_color = function (color) {
 //            if (typeof cached_colored_snake_sprites[String(color)] !== "undefined")
 //                delete cached_colored_snake_sprites[String(color)];
 //        };
 
         // Returns recolored and resized sprite.
-        var get_or_create_color = this.get_or_create_color = function(color) {
+        self.get_or_create_color = function(color) {
             if (typeof cached_colored_snake_sprites[String(color)] !== "undefined")
                 return cached_colored_snake_sprites[String(color)];
             else
                 return cached_colored_snake_sprites[String(color)] =
-                    canvas_draw.antialiasing(canvas_draw.recolor_image(snake_sprite, color));
+                    canvas_controller.antialiasing(canvas_controller.recolor_image(snake_sprite, color));
         };
         
         // Drawing sprites
 
         // Ease everything from square at passed coordinates
-        var clear_square = this.clear_square = function (coordinates) {
+        self.clear_square = function (coordinates) {
             context.clearRect(coordinates[0] * (border + size) + border, coordinates[1] * (border + size) + border, size, size);
         };
 
         // Draws an image from sprite of a passed type and color
         // Note that recolored sprite will be cached!
-        var fill_square_from_sprite = this.fill_square = function (coordinates, color, phase, type) {
-            var colored_sprite = get_or_create_color(color);
+        self.fill_square_from_sprite = function (coordinates, color, phase, type) {
+            var colored_sprite = self.get_or_create_color(color);
             var element_coordinates = sprite_mappings[phase][type];
 
             context.drawImage(colored_sprite,
-                              element_coordinates[0] * (sprite_element_size + sprite_element_border) + padding_x,
-                              element_coordinates[1] * (sprite_element_size + sprite_element_border) + padding_y,
-                              sprite_element_size,
-                              sprite_element_size,
-                              coordinates[0] * (border + size) + border,
-                              coordinates[1] * (border + size) + border,
-                              size,
-                              size);
+                                   element_coordinates[0] * (sprite_element_size + sprite_element_border) + padding_x,
+                                   element_coordinates[1] * (sprite_element_size + sprite_element_border) + padding_y,
+                                   sprite_element_size,
+                                   sprite_element_size,
+                                   coordinates[0] * (border + size) + border,
+                                   coordinates[1] * (border + size) + border,
+                                   size,
+                                   size);
         };
 
         // Ease a snake
-        var clear_snake = this.clear_snake = function (snake, phase, color) {
+        self.clear_snake = function (snake, phase, color) {
             for (var i = 0; i < snake.length; i++)
                 clear_square([snake[i][0], snake[i][1]]);
         };
@@ -282,7 +283,7 @@
         };
 
         // Draws snake of a passed color at a passed phase
-        var draw_snake = this.draw_snake = function (snake, phase, color) {
+        self.draw_snake = function (snake, phase, color) {
             var number, position, type;
             for (var i = 0; i < snake.length; i++) {
                 number = (snake[i][0] + snake[i][1]) % 2;
@@ -293,7 +294,7 @@
                                 -snake[i + 1][1] + snake[i][1]
                     ];
                     type = 'head_' + resolve_direction(position) + '_' + number;
-                    fill_square_from_sprite(snake[i], color, phase, type);
+                    self.fill_square_from_sprite(snake[i], color, phase, type);
                 } else if (i < snake.length - 2) {
                     position = [snake[i - 1][0] - snake[i][0],
                                 snake[i - 1][1] - snake[i][1],
@@ -301,7 +302,7 @@
                                 snake[i + 1][1] - snake[i][1]
                     ];
                     type = 'body_' + resolve_direction(position) + '_' + number;
-                    fill_square_from_sprite(snake[i], color, 0, type);
+                    self.fill_square_from_sprite(snake[i], color, 0, type);
                 } else if (i == snake.length - 1) {
                     position = [-snake[i - 1][0] + snake[i][0],
                                 -snake[i - 1][1] + snake[i][1],
@@ -309,7 +310,7 @@
                                 snake[i - 1][1] - snake[i][1]
                     ];
                     type = 'tail_' + resolve_direction(position) + '_' + number;
-                    fill_square_from_sprite(snake[i], color, phase, type);
+                    self.fill_square_from_sprite(snake[i], color, phase, type);
                 } else {
                     position = [snake[i - 1][0] - snake[i][0],
                                 snake[i - 1][1] - snake[i][1],
@@ -317,13 +318,13 @@
                                 snake[i + 1][1] - snake[i][1]
                     ];
                     type = 'body_' + resolve_direction(position) + '_' + number;
-                    fill_square_from_sprite(snake[i], color, phase, type);
+                    self.fill_square_from_sprite(snake[i], color, phase, type);
                 }
             }
         };
 
         // Clears canvas and draws field
-        var reset_field = this.reset_field = function () {
+        self.reset_field = function () {
             context.clearRect(0, 0, canvas_width, canvas_height);
 
             for (var i = 0; i < canvas_height; i += border + size)
@@ -333,7 +334,7 @@
                 context.fillRect(i, 0, border, canvas_height);
         };
 
-        var draw_loading_screen = this.draw_loading_screen = function (text, percentage) {
+        self.draw_loading_screen = function (text, percentage) {
             context.clearRect(0, 0, canvas_width, canvas_height);
 
             context.fillText(text, 0.5 * canvas_width, 0.5 * canvas_height - 50);
@@ -352,7 +353,7 @@
                     arrow_sprite.Up.onload =
                         arrow_sprite.Down.onload = function () {
                             images_loaded++;
-                            draw_loading_screen('Loading...', images_loaded / 5);
+                            self.draw_loading_screen('Loading...', images_loaded / 5);
                             if (images_loaded >= 5) {
                                 onload_callback();
                             }
@@ -372,7 +373,7 @@
     // ============================
 
     // Changes color of an image
-    canvas_draw.recolor_image = function (sprite, color, static_mappings, color_barrier) {
+    canvas_controller.recolor_image = function (sprite, color, static_mappings, color_barrier) {
         static_mappings = typeof static_mappings === "undefined" ? {} : color_barrier;
         color_barrier = typeof color_barrier === "undefined" ? 50 : color_barrier;
 
@@ -410,7 +411,7 @@
     };
 
     // Applies antialiasing
-    canvas_draw.antialiasing = function (sprite, hardness) {
+    canvas_controller.antialiasing = function (sprite, hardness) {
         hardness = typeof hardness === "undefined" ? 0.65 : hardness;
         if (hardness > 1) hardness = 1;
         if (hardness < 0) hardness = 0;

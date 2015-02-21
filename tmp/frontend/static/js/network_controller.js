@@ -3,10 +3,10 @@
     // Variable definitions
     // ====================
 
-    // API namespace `network`
-    var network = this.network = {};
+    // API namespace `network_controller`
+    this.network_controller = {};
 
-    network.SocketConnection = function (destination) {
+    network_controller.SocketConnection = function (destination) {
         var self = this;
 
         destination = typeof destination === "undefined" ? "ws:localhost:9000/test" : destination;
