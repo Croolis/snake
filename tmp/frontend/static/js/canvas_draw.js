@@ -178,9 +178,12 @@
 
         // Sprites size
         var sprite_element_size = 4 * 20,
-            sprite_element_border = 4 * 2;
+            sprite_element_border = 4 * 2,
+            padding_x = 20,
+            padding_y = 1;
 
         // Sprites
+        // Src data is bound in the init sequence (see bottom of this class)
         var snake_sprite = new Image();
         var arrow_sprite = {
             "Left": new Image(),
@@ -191,26 +194,6 @@
         
         // The colored images are stored here
         var cached_colored_snake_sprites = {};
-
-
-        // Waiting for images to load, than running callback
-        var images_loaded = 0;
-        snake_sprite.onload =
-            arrow_sprite.Left.onload =
-            arrow_sprite.Right.onload =
-            arrow_sprite.Up.onload =
-            arrow_sprite.Down.onload = function () {
-                images_loaded++;
-                if (images_loaded >= 5)
-                    onload_callback();
-            };
-
-        // Sprites data
-        snake_sprite.src = "static/snake2x.png";
-        arrow_sprite.Left.src = "static/arrow_left.png";
-        arrow_sprite.Right.src = "static/arrow_right.png";
-        arrow_sprite.Up.src = "static/arrow_up.png";
-        arrow_sprite.Down.src = "static/arrow_down.png";
 
 
         // Methods
@@ -251,8 +234,8 @@
             var element_coordinates = sprite_mappings[phase][type];
 
             context.drawImage(colored_sprite,
-                              element_coordinates[0] * (sprite_element_size + sprite_element_border) + 20,
-                              element_coordinates[1] * (sprite_element_size + sprite_element_border) + 1,
+                              element_coordinates[0] * (sprite_element_size + sprite_element_border) + padding_x,
+                              element_coordinates[1] * (sprite_element_size + sprite_element_border) + padding_y,
                               sprite_element_size,
                               sprite_element_size,
                               coordinates[0] * (border + size) + border,
@@ -339,17 +322,49 @@
             }
         };
 
+        // Clears canvas and draws field
+        var reset_field = this.reset_field = function () {
+            context.clearRect(0, 0, canvas_width, canvas_height);
+
+            for (var i = 0; i < canvas_height; i += border + size)
+                context.fillRect(0, i, canvas_width, border);
+
+            for (i = 0; i < canvas_width; i += border + size)
+                context.fillRect(i, 0, border, canvas_height);
+        };
+
+        var draw_loading_screen = this.draw_loading_screen = function (text, percentage) {
+            context.clearRect(0, 0, canvas_width, canvas_height);
+
+            context.fillText(text, 0.5 * canvas_width, 0.5 * canvas_height - 50);
+            context.fillRect(0, 0.5 * canvas_height - 25, percentage * canvas_width, 10);
+        };
+
 
         // Init sequence
         // -------------
 
-        context.clearRect(0, 0, canvas_width, canvas_height);
+        // Waiting for images to load, than running callback
+        var images_loaded = 0;
+        snake_sprite.onload =
+            arrow_sprite.Left.onload =
+                arrow_sprite.Right.onload =
+                    arrow_sprite.Up.onload =
+                        arrow_sprite.Down.onload = function () {
+                            images_loaded++;
+                            draw_loading_screen('Loading...', images_loaded / 5);
+                            if (images_loaded >= 5) {
+                                onload_callback();
+                            }
+                        };
 
-        for (var i = 0; i < canvas_height; i += border + size)
-            context.fillRect(0, i, canvas_width, border);
+        // Sprites data
+        snake_sprite.src = "static/snake2x.png";
+        arrow_sprite.Left.src = "static/arrow_left.png";
+        arrow_sprite.Right.src = "static/arrow_right.png";
+        arrow_sprite.Up.src = "static/arrow_up.png";
+        arrow_sprite.Down.src = "static/arrow_down.png";
 
-        for (i = 0; i < canvas_width; i += border + size)
-            context.fillRect(i, 0, border, canvas_height);
     };
 
 
