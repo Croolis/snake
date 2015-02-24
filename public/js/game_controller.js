@@ -45,7 +45,7 @@
         var drawer = new CanvasController(canvas, h_amount, w_amount, size, border, function () {
             drawer.draw_loading_screen('Connecting...', 1);
 
-            socket = new NetworkController();
+            socket = new NetworkController(socket_url);
 
             socket.on_message = function(e, d) {
                 if (DEBUG) console.log('message:', e);
