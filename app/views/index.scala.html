@@ -1,7 +1,23 @@
-@(message: String)
+@(host: String)
 
-@main("Welcome to Play") {
+@main("Snake!") {
 
-    @play20.welcome(message)
+    <canvas id='playground'></canvas>
+
+    <script type="text/javascript" src="@routes.Assets.at("js/network_controller.js")"></script>
+    <script type="text/javascript" src="@routes.Assets.at("js/canvas_controller.js")"></script>
+    <script type="text/javascript" src="@routes.Assets.at("js/game_controller.js")"></script>
+
+    <script type="text/javascript">
+        var game = new GameController({
+            canvas: document.getElementById("playground"),
+            h_amount: 20,
+            w_amount: 40,
+            size: 20,
+            border: 1,
+            socket_url: "@host"
+        });
+    </script>
+
 
 }

@@ -389,11 +389,11 @@
                         };
 
         // Sprites data
-        snake_sprite.src = "static/snake2x.png";
-        arrow_sprite.Left.src = "static/arrow_left.png";
-        arrow_sprite.Right.src = "static/arrow_right.png";
-        arrow_sprite.Up.src = "static/arrow_up.png";
-        arrow_sprite.Down.src = "static/arrow_down.png";
+        snake_sprite.src = "assets/snake2x.png";
+        arrow_sprite.Left.src = "assets/arrow_left.png";
+        arrow_sprite.Right.src = "assets/arrow_right.png";
+        arrow_sprite.Up.src = "assets/arrow_up.png";
+        arrow_sprite.Down.src = "assets/arrow_down.png";
 
     };
 
