@@ -1,6 +1,95 @@
-logs
-project/project
-project/target
-target
-.idea
+# Gitignore to cover all files for
+# Got it from `https://github.com/github/gitignore`
+
+# Scala
+# =====
+
+*.class
 *.log
+logs/
+
+# sbt specific
+.cache
+.history
+.lib/
+dist/*
+target/
+lib_managed/
+src_managed/
+project/boot/
+project/plugins/project/
+
+# Scala-IDE specific
+.scala_dependencies
+.worksheet
+
+# ##########################
+# Global .gitignore settings
+# ##########################
+#
+# The lines below should not be here because everyone should
+# add them to theirs global `.gitignore` file.
+#
+# Since no-one knows about this feature I've added them
+# to stop polluting repository.
+#
+# Please add the below lines to your global gitignore
+# which is usually placed in `~/.gitconfig`.
+#
+# See `http://habrahabr.ru/post/202696/` for more useful stuff.
+#
+
+
+# IDEs
+# ====
+
+# Add your favourite IDE
+
+.idea
+
+
+# Windows
+# =======
+
+# Windows image file caches
+Thumbs.db
+ehthumbs.db
+
+# Folder config file
+Desktop.ini
+
+# Recycle Bin used on file shares
+$RECYCLE.BIN/
+
+# Windows shortcuts
+*.lnk
+
+
+# Linux
+# =====
+
+*~
+
+# KDE directory preferences
+.directory
+
+# Linux trash folder which might appear on any partition or disk
+.Trash-*
+
+
+# OSX
+# ===
+
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Icon must end with two \r
+Icon
+
+# Thumbnails
+._*
+
+# Files that might appear on external disk
+.Spotlight-V100
+.Trashes

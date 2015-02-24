@@ -21,7 +21,7 @@ class Mouse(private val snakes: Seq[Snake],
 
     def distance(p1: (Int, Int), p2: (Int, Int)) = {
       val ((x1, y1), (x2, y2)) = (p1, p2)
-      math.sqrt((x2 - x1) ^ 2 + (y2 - y1) ^ 2)
+      math.sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1))
     }
 
     val best = availableMoves maxBy (p => heads minBy (distance(p, _)))
