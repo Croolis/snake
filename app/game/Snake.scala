@@ -27,7 +27,7 @@ class Snake(position: (Int, Int),
 
   def alive = _body.length > 0
 
-  def indexOfSegment(segment: (Int, Int)) = body indexOf segment
+  def indexOfSegment(segment: (Int, Int), from: Int = 0) = (body drop from indexOf segment) + from
 
   def move() = {
     if (length > 0) {

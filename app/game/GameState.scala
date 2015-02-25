@@ -93,13 +93,12 @@ class GameState(playerSeq: Seq[Player], val width: Int = 40, val height: Int = 2
     for {
       (player1, predator) <- players
       (player2, victim) <- players
-      pos = victim.indexOfSegment(predator.head)
+      pos = victim.indexOfSegment(predator.head, 2)
       if pos >= 2
     } {
       predator.feed((victim.length - pos + 1) / 2)
       victim.cut(predator.head)
       sendMessage("cut", JsObject(Seq("predator" -> JsString(player1), "victim" -> JsString(player2))))
-      println("Cut")
     }
 
     // Feed snakes.
