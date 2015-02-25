@@ -20,14 +20,14 @@ object Orientation {
         case Down => (x, y + 1)
       }
       val (width, height) = fieldSize
-      if (x1 == width)
+      if (x1 >= width)
         x1 = 0
-      if (x1 == -1)
-        x1 = width
-      if (y1 == height)
+      if (x1 < 0)
+        x1 = width - 1
+      if (y1 >= height)
         y1 = 0
-      if (y1 == -1)
-        y1 = height
+      if (y1 < 0)
+        y1 = height - 1
       (x1, y1)
     }
   }

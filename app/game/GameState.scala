@@ -64,6 +64,7 @@ class GameState(playerSeq: Seq[Player], val width: Int = 40, val height: Int = 2
     // Move snakes.
     val snakes = players.unzip._2
     snakes foreach (_.move())
+    // Move mouse.
     if (mouse != null)
       mouse.move()
 
@@ -98,6 +99,7 @@ class GameState(playerSeq: Seq[Player], val width: Int = 40, val height: Int = 2
       predator.feed((victim.length - pos + 1) / 2)
       victim.cut(predator.head)
       sendMessage("cut", JsObject(Seq("predator" -> JsString(player1), "victim" -> JsString(player2))))
+      println("Cut")
     }
 
     // Feed snakes.
