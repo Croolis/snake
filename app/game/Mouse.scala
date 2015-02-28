@@ -6,13 +6,14 @@ class Mouse(private val snakes: Seq[Snake],
             private val fieldSize: (Int, Int),
             private var pos: (Int, Int)) {
 
-  val ticksPerMove = 2
+  val ticksPerMove = 1
   private var ticks = 0
 
   def move(): Unit = {
     ticks = (ticks + 1) % ticksPerMove
     if (ticks != 0) return
 
+    val (width, height) = fieldSize
     val heads = snakes map (_.head) filter (_ !=(-1, -1))
     val bodies = Set() ++ snakes flatMap (_.body)
     val availableMoves = pos +: (Orientation.orientations map
@@ -21,10 +22,10 @@ class Mouse(private val snakes: Seq[Snake],
 
     def distance(p1: (Int, Int), p2: (Int, Int)) = {
       val ((x1, y1), (x2, y2)) = (p1, p2)
-      math.sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1))
+      math.min(math.abs(y2 - y1), height - math.abs(y2 - y1)) + math.min(math.abs(x2 - x1), width - math.abs(x2 - x1))
     }
 
-    val best = availableMoves maxBy (p => heads minBy (distance(p, _)))
+    val best = availableMoves maxBy (p => heads map (distance(p, _)) min)
 
     pos = best
   }
