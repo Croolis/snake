@@ -12,7 +12,7 @@ class GameServer(private val players: Array[PlayerConnection]) {
     p.onReceive = msg => receive(p.player, msg)
     p.onClose = () => playerLeave(p.player)
     if (players.count(_.player.username == p.player.username) > 1)
-      p.rename(p.player.username + (2 ^ 10 + Random.nextInt(2 ^ 10)).toString)
+      p.rename(p.player.username + (1024 + Random.nextInt(1024)).toString)
     p.send(Message("your name", JsString(p.player.username)))
   })
 
