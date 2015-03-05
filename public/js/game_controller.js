@@ -29,7 +29,7 @@
         // -1 = error
         // 0 = initializing
         // 1 = normal game mode
-        // 2 = battle
+        // 2 = duel
         // 3 = game over
 
         var self_name;
@@ -101,6 +101,7 @@
             }
         };
         var move = function (e, d) {
+            game_status = 1;
             var dt = Date.now() - last_move_message;
             last_move_message = Date.now();
 
@@ -114,12 +115,12 @@
                 }
             }
 
-            draw_frame(e, d, 0);
+            draw_main_frame(e, d, 0);
 
             clearTimeout(animation_frame_1);
             clearTimeout(animation_frame_2);
-            animation_frame_1 = window.setTimeout(function () {draw_frame(e, d, 1);}, dt / 3);
-            animation_frame_2 = window.setTimeout(function () {draw_frame(e, d, 2);}, 2 * dt / 3);
+            animation_frame_1 = window.setTimeout(function () {draw_main_frame(e, d, 1);}, dt / 3);
+            animation_frame_2 = window.setTimeout(function () {draw_main_frame(e, d, 2);}, 2 * dt / 3);
         };
         var cut = function (e, d) {};
         var apple_eaten = function (e, d) {};
@@ -132,8 +133,7 @@
         var duel = function (e, d) {};
         var duel_ended = function (e, d) {};
 
-        document.onkeydown = key_handler;
-        function key_handler(event) {
+        document.onkeydown = function (event) {
             if (event.type == "keydown")
                 switch (event.keyCode) {
                     case (37): socket.send("Left"); break;
@@ -141,9 +141,9 @@
                     case (39): socket.send("Right"); break;
                     case (40): socket.send("Down"); break;
                 }
-        }
+        };
 
-        var draw_frame = function (e, d, phase) {
+        var draw_main_frame = function (e, d, phase) {
             drawer.reset_field();
             for (var i = 0; i < d.data.length; i++) {
                 if (d.data[i].player && players[d.data[i].player.name]) {
@@ -167,7 +167,7 @@
                     drawer.fill_square_from_sprite(d.data[i].mouse, [0, 0, 0], 'food', 'mushroom');
                 }
             }
-        }
+        };
 
     };
 

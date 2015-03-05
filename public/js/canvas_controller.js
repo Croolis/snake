@@ -372,8 +372,9 @@
 
             context.textBaseline = "middle";
             context.textAlign = "center";
-            context.fillText(text, 0.5 * canvas_width, 0.5 * canvas_height - 50);
-            context.fillRect(0, 0.5 * canvas_height - 25, percentage * canvas_width, 10);
+            context.fillText(text, canvas_width / 2, canvas_height / 2 - 50);
+            context.fillRect(0, canvas_height / 2 - 25, percentage * canvas_width, 10);
+        };
         };
 
 
