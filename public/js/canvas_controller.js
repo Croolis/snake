@@ -375,6 +375,24 @@
             context.fillText(text, canvas_width / 2, canvas_height / 2 - 50);
             context.fillRect(0, canvas_height / 2 - 25, percentage * canvas_width, 10);
         };
+
+        self.draw_duel_screen = function (player1, player2, power1, power2, direction1, direction2) {
+            context.clearRect(0, 0, canvas_width, canvas_height);
+
+            console.log(player1, player2, power1, power2, direction1, direction2);
+
+            context.textBaseline = "bottom";
+            context.textAlign = "left";
+            context.fillText(player1, 100, canvas_height / 2 - 50);
+            context.fillRect(100, canvas_height / 2 - 35, power1 / 100 * (canvas_width / 2 - 100), 10);
+            context.drawImage(arrow_sprite[direction1], 100, canvas_height / 2, 50, 50);
+
+            context.textBaseline = "bottom";
+            context.textAlign = "right";
+            context.fillText(player2, canvas_width - 100, canvas_height / 2 - 50);
+            context.fillRect(canvas_width - 100 - power2 / 100 * (canvas_width / 2 - 100), canvas_height / 2 - 35, power2 / 100 * (canvas_width / 2 - 100), 10);
+            context.drawImage(arrow_sprite[direction2], canvas_width - 150, canvas_height / 2, 50, 50);
+        };
         };
 
 

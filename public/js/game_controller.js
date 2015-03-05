@@ -130,7 +130,17 @@
         };
         var died = function (e, d) {};
         var game_over = function (e, d) {};
-        var duel = function (e, d) {};
+        var duel = function (e, d) {
+            game_status = 2;
+            drawer.draw_duel_screen(
+                d.data.player1,
+                d.data.player2,
+                d.data.pow1,
+                d.data.pow2,
+                d.data.orient1,
+                d.data.orient2
+            );
+        };
         var duel_ended = function (e, d) {};
 
         document.onkeydown = function (event) {
