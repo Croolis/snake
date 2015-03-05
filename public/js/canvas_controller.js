@@ -367,6 +367,39 @@
                 context.fillRect(i, 0, border, canvas_height);
         };
 
+        // Draws list of all players
+        self.draw_players = function (players, self_name) {
+            var i, j = 0;
+
+            for (i in players) {
+                if (players.hasOwnProperty(i)) {
+                    j += 1;
+
+                    context.textBaseline = "top";
+                    context.textAlign = "left";
+                    // context.font = '15px Arial';
+                    context.strokeStyle = "#FFF";
+                    context.lineWidth = 4;
+
+                    var t = i;
+                    if (i == self_name)
+                        t += ' [me]';
+
+                    context.strokeText(t, 25, 10 + 17 * j);
+                    context.fillText(t, 25, 10 + 17 * j);
+
+                    context.fillStyle = "rgb(" +
+                        Math.floor(players[i].color[0]) + ", " +
+                        Math.floor(players[i].color[1]) + ", " +
+                        Math.floor(players[i].color[2]) + ")";
+
+                    context.fillRect(10, 10 + 17 * j, 10, 10);
+
+                    context.fillStyle = "#000";
+                }
+            }
+        };
+
         self.draw_loading_screen = function (text, percentage) {
             context.clearRect(0, 0, canvas_width, canvas_height);
 
@@ -378,8 +411,6 @@
 
         self.draw_duel_screen = function (player1, player2, power1, power2, direction1, direction2) {
             context.clearRect(0, 0, canvas_width, canvas_height);
-
-            console.log(player1, player2, power1, power2, direction1, direction2);
 
             context.textBaseline = "bottom";
             context.textAlign = "left";
@@ -498,6 +529,6 @@
         temp_context.drawImage(temp_canvas2, 0, 0, temp_canvas2.width * hardness, temp_canvas2.height * hardness, 0, 0, temp_canvas.width, temp_canvas.height);
 
         return temp_canvas;
-    }
+    };
 
 })();

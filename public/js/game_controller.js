@@ -157,28 +157,30 @@
         };
 
         var draw_main_frame = function (e, d, phase) {
-            drawer.reset_field();
-            for (var i = 0; i < d.data.length; i++) {
-                if (d.data[i].player && players[d.data[i].player.name]) {
-                    var player = players[d.data[i].player.name];
-                    if (player.snake.length > player.last_snake.length)
+            if (game_status == 1) {
+                drawer.reset_field();
+                for (var i = 0; i < d.data.length; i++) {
+                    if (d.data[i].player && players[d.data[i].player.name]) {
+                        var player = players[d.data[i].player.name];
+                        if (player.snake.length > player.last_snake.length)
                         //noinspection JSDuplicatedDeclaration
-                        var actual_phase = [phase, 2];
+                            var actual_phase = [phase, 2];
 
-                    else
+                        else
                         //noinspection JSDuplicatedDeclaration
-                        var actual_phase = phase;
+                            var actual_phase = phase;
 
-                    if (player['rainbow'])
-                        drawer.draw_snake(player.snake, actual_phase, 'rainbow');
-                    else
-                        drawer.draw_snake(player.snake, actual_phase, player.color);
-                } else if (d.data[i].apple) {
-                    var apple_sprite = 'apple_' + ((d.data[i].apple[0] + d.data[i].apple[1]) % 3);
-                    drawer.fill_square_from_sprite(d.data[i].apple, [0, 0, 0], 'food', apple_sprite);
-                } else if (d.data[i].mouse) {
-                    drawer.fill_square_from_sprite(d.data[i].mouse, [0, 0, 0], 'food', 'mushroom');
+                        if (player['rainbow'])
+                            drawer.draw_snake(player.snake, actual_phase, 'rainbow'); else
+                            drawer.draw_snake(player.snake, actual_phase, player.color);
+                    } else if (d.data[i].apple) {
+                        var apple_sprite = 'apple_' + ((d.data[i].apple[0] + d.data[i].apple[1]) % 3);
+                        drawer.fill_square_from_sprite(d.data[i].apple, [0, 0, 0], 'food', apple_sprite);
+                    } else if (d.data[i].mouse) {
+                        drawer.fill_square_from_sprite(d.data[i].mouse, [0, 0, 0], 'food', 'mushroom');
+                    }
                 }
+                drawer.draw_players(players, self_name);
             }
         };
 
