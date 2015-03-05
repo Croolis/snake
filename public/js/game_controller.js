@@ -29,7 +29,7 @@
         // -1 = error
         // 0 = initializing
         // 1 = normal game mode
-        // 2 = battle
+        // 2 = duel
         // 3 = game over
 
         var self_name;
@@ -93,13 +93,15 @@
                 var user = d.data[i];
                 var player = players[user.username] = {};
                 // player['color'] = user.color;
-                player['color'] = [Math.random() * 200, Math.random() * 200, Math.random() * 200];
-                drawer.cache_color(player['color']);
-                player['snake'] = [];
-                player['last_snake'] = [];
+                player.color = [Math.random() * 200, Math.random() * 200, Math.random() * 200];
+                drawer.cache_color(player.color);
+                player.snake = [];
+                player.last_snake = [];
+                player.rainbow = 0;
             }
         };
         var move = function (e, d) {
+            game_status = 1;
             var dt = Date.now() - last_move_message;
             last_move_message = Date.now();
 
@@ -108,26 +110,69 @@
                     var player = players[d.data[i].player.name];
                     player.last_snake = player.snake;
                     player.snake = d.data[i].player.snake;
+                    if (player.rainbow)
+                        player.rainbow -= 1;
                 }
             }
 
-            draw_frame(e, d, 0);
+            draw_main_frame(e, d, 0);
 
             clearTimeout(animation_frame_1);
             clearTimeout(animation_frame_2);
-            animation_frame_1 = window.setTimeout(function () {draw_frame(e, d, 1);}, dt / 3);
-            animation_frame_2 = window.setTimeout(function () {draw_frame(e, d, 2);}, 2 * dt / 3);
+            animation_frame_1 = window.setTimeout(function () {draw_main_frame(e, d, 1);}, dt / 3);
+            animation_frame_2 = window.setTimeout(function () {draw_main_frame(e, d, 2);}, 2 * dt / 3);
         };
-        var cut = function (e, d) {};
+        var cut = function (e, d) {
+            if (players[d.data.victim].rainbow > 0)
+                players[d.data.predator].rainbow = players[d.data.victim].rainbow;
+        };
         var apple_eaten = function (e, d) {};
-        var mouse_eaten = function (e, d) {};
+        var mouse_eaten = function (e, d) {
+            if (players[d.data])
+                players[d.data].rainbow = 15;
+        };
         var died = function (e, d) {};
-        var game_over = function (e, d) {};
-        var duel = function (e, d) {};
+        var game_over = function (e, d) {
+            game_status = 3;
+            if (d.data == self_name)
+                drawer.draw_win_screen('You');
+            else
+                drawer.draw_win_screen(d.data);
+        };
+        var duel = function (e, d) {
+            game_status = 2;
+
+            if (d.data.player1 == self_name) {
+                d.data.player1 = 'YOU';
+                drawer.draw_duel_screen(
+                    d.data.player1,
+                    d.data.player2,
+                    d.data.pow1,
+                    d.data.pow2,
+                    d.data.orient1,
+                    d.data.orient2);
+            } else if (d.data.player2 == self_name) {
+                d.data.player2 = 'YOU';
+                drawer.draw_duel_screen(
+                    d.data.player2,
+                    d.data.player1,
+                    d.data.pow2,
+                    d.data.pow1,
+                    d.data.orient2,
+                    d.data.orient1);
+            } else {
+                drawer.draw_duel_screen(
+                    d.data.player1,
+                    d.data.player2,
+                    d.data.pow1,
+                    d.data.pow2,
+                    d.data.orient1,
+                    d.data.orient2);
+            }
+        };
         var duel_ended = function (e, d) {};
 
-        document.onkeydown = key_handler;
-        function key_handler(event) {
+        document.onkeydown = function (event) {
             if (event.type == "keydown")
                 switch (event.keyCode) {
                     case (37): socket.send("Left"); break;
@@ -135,30 +180,35 @@
                     case (39): socket.send("Right"); break;
                     case (40): socket.send("Down"); break;
                 }
-        }
+        };
 
-        var draw_frame = function (e, d, phase) {
-            drawer.reset_field();
-            for (var i = 0; i < d.data.length; i++) {
-                if (d.data[i].player && players[d.data[i].player.name]) {
-                    var player = players[d.data[i].player.name];
-                    if (player.snake.length > player.last_snake.length)
+        var draw_main_frame = function (e, d, phase) {
+            if (game_status == 1) {
+                drawer.reset_field();
+                for (var i = 0; i < d.data.length; i++) {
+                    if (d.data[i].player && players[d.data[i].player.name]) {
+                        var player = players[d.data[i].player.name];
+                        if (player.snake.length > player.last_snake.length)
                         //noinspection JSDuplicatedDeclaration
-                        var actual_phase = [phase, 2];
+                            var actual_phase = [phase, 2];
 
-                    else
+                        else
                         //noinspection JSDuplicatedDeclaration
-                        var actual_phase = phase;
+                            var actual_phase = phase;
 
-                    drawer.draw_snake(player.snake, actual_phase, player.color);
-                } else if (d.data[i].apple) {
-                    var apple_sprite = 'apple_' + ((d.data[i].apple[0] + d.data[i].apple[1]) % 3);
-                    drawer.fill_square_from_sprite(d.data[i].apple, [0, 0, 0], 'food', apple_sprite);
-                } else if (d.data[i].mouse) {
-                    drawer.fill_square_from_sprite(d.data[i].mouse, [0, 0, 0], 'food', 'mushroom');
+                        if (player['rainbow'])
+                            drawer.draw_snake(player.snake, actual_phase, 'rainbow'); else
+                            drawer.draw_snake(player.snake, actual_phase, player.color);
+                    } else if (d.data[i].apple) {
+                        var apple_sprite = 'apple_' + ((d.data[i].apple[0] + d.data[i].apple[1]) % 3);
+                        drawer.fill_square_from_sprite(d.data[i].apple, [0, 0, 0], 'food', apple_sprite);
+                    } else if (d.data[i].mouse) {
+                        drawer.fill_square_from_sprite(d.data[i].mouse, [0, 0, 0], 'food', 'mushroom');
+                    }
                 }
+                drawer.draw_players(players, self_name);
             }
-        }
+        };
 
     };
 

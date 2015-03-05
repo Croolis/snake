@@ -179,7 +179,8 @@
 
         // Sprites
         // Src data is bound in the init sequence (see bottom of this class)
-        var snake_sprite = new Image();
+        var snake_sprite = new Image(),
+            snake_sprite_rainbow = [new Image(), new Image(), new Image()];
         var arrow_sprite = {
             "Left": new Image(),
             "Right": new Image(),
@@ -227,7 +228,12 @@
         // Draws an image from sprite of a passed type and color
         // Note that recolored sprite will be cached!
         self.fill_square_from_sprite = function (coordinates, color, phase, type) {
-            var colored_sprite = self.get_or_create_color(color);
+            if (color === 'rainbow')
+                //noinspection JSDuplicatedDeclaration
+                var colored_sprite = snake_sprite_rainbow[Math.floor(Math.random() * 3)];
+            else
+                //noinspection JSDuplicatedDeclaration
+                var colored_sprite = self.get_or_create_color(color);
             var element_coordinates = sprite_mappings[phase][type];
 
             context.drawImage(colored_sprite,
@@ -361,13 +367,71 @@
                 context.fillRect(i, 0, border, canvas_height);
         };
 
+        // Draws list of all players
+        self.draw_players = function (players, self_name) {
+            var i, j = 0;
+
+            for (i in players) {
+                if (players.hasOwnProperty(i)) {
+                    j += 1;
+
+                    context.textBaseline = "top";
+                    context.textAlign = "left";
+                    // context.font = '15px Arial';
+                    context.strokeStyle = "#FFF";
+                    context.lineWidth = 4;
+
+                    var t = i;
+                    if (i == self_name)
+                        t += ' [me]';
+
+                    context.strokeText(t, 25, 10 + 17 * j);
+                    context.fillText(t, 25, 10 + 17 * j);
+
+                    context.fillStyle = "rgb(" +
+                        Math.floor(players[i].color[0]) + ", " +
+                        Math.floor(players[i].color[1]) + ", " +
+                        Math.floor(players[i].color[2]) + ")";
+
+                    context.fillRect(10, 10 + 17 * j, 10, 10);
+
+                    context.fillStyle = "#000";
+                }
+            }
+        };
+
         self.draw_loading_screen = function (text, percentage) {
             context.clearRect(0, 0, canvas_width, canvas_height);
 
             context.textBaseline = "middle";
             context.textAlign = "center";
-            context.fillText(text, 0.5 * canvas_width, 0.5 * canvas_height - 50);
-            context.fillRect(0, 0.5 * canvas_height - 25, percentage * canvas_width, 10);
+            context.fillText(text, canvas_width / 2, canvas_height / 2 - 50);
+            context.fillRect(0, canvas_height / 2 - 25, percentage * canvas_width, 10);
+        };
+
+        self.draw_duel_screen = function (player1, player2, power1, power2, direction1, direction2) {
+            context.clearRect(0, 0, canvas_width, canvas_height);
+
+            context.textBaseline = "bottom";
+            context.textAlign = "left";
+            context.fillText(player1, 100, canvas_height / 2 - 50);
+            context.fillRect(100, canvas_height / 2 - 35, power1 / 100 * (canvas_width / 2 - 100), 10);
+            context.drawImage(arrow_sprite[direction1], 100, canvas_height / 2, 50, 50);
+
+            context.textBaseline = "bottom";
+            context.textAlign = "right";
+            context.fillText(player2, canvas_width - 100, canvas_height / 2 - 50);
+            context.fillRect(canvas_width - 100 - power2 / 100 * (canvas_width / 2 - 100), canvas_height / 2 - 35, power2 / 100 * (canvas_width / 2 - 100), 10);
+            context.drawImage(arrow_sprite[direction2], canvas_width - 150, canvas_height / 2, 50, 50);
+        };
+
+        self.draw_win_screen = function (player) {
+            context.clearRect(0, 0, canvas_width, canvas_height);
+
+            context.textBaseline = "middle";
+            context.textAlign = "center";
+            context.font = '25px Arial';
+            context.fillText(player + ' win!', canvas_width / 2, canvas_height / 2 - 50);
         };
 
 
@@ -377,19 +441,25 @@
         // Waiting for images to load, than running callback
         var images_loaded = 0;
         snake_sprite.onload =
+            snake_sprite_rainbow[0].onload =
+            snake_sprite_rainbow[1].onload =
+            snake_sprite_rainbow[2].onload =
             arrow_sprite.Left.onload =
-                arrow_sprite.Right.onload =
-                    arrow_sprite.Up.onload =
-                        arrow_sprite.Down.onload = function () {
-                            images_loaded++;
-                            self.draw_loading_screen('Loading...', images_loaded / 5);
-                            if (images_loaded >= 5) {
-                                on_load_callback();
-                            }
-                        };
+            arrow_sprite.Right.onload =
+            arrow_sprite.Up.onload =
+            arrow_sprite.Down.onload = function () {
+                images_loaded++;
+                self.draw_loading_screen('Loading...', images_loaded / 8);
+                if (images_loaded >= 8) {
+                    on_load_callback();
+                }
+            };
 
         // Sprites data
         snake_sprite.src = "assets/snake2x.png";
+        snake_sprite_rainbow[0].src = "assets/snake2x_rainbow1.png";
+        snake_sprite_rainbow[1].src = "assets/snake2x_rainbow2.png";
+        snake_sprite_rainbow[2].src = "assets/snake2x_rainbow3.png";
         arrow_sprite.Left.src = "assets/arrow_left.png";
         arrow_sprite.Right.src = "assets/arrow_right.png";
         arrow_sprite.Up.src = "assets/arrow_up.png";
@@ -459,6 +529,6 @@
         temp_context.drawImage(temp_canvas2, 0, 0, temp_canvas2.width * hardness, temp_canvas2.height * hardness, 0, 0, temp_canvas.width, temp_canvas.height);
 
         return temp_canvas;
-    }
+    };
 
 })();
