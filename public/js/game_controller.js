@@ -93,10 +93,11 @@
                 var user = d.data[i];
                 var player = players[user.username] = {};
                 // player['color'] = user.color;
-                player['color'] = [Math.random() * 200, Math.random() * 200, Math.random() * 200];
-                drawer.cache_color(player['color']);
-                player['snake'] = [];
-                player['last_snake'] = [];
+                player.color = [Math.random() * 200, Math.random() * 200, Math.random() * 200];
+                drawer.cache_color(player.color);
+                player.snake = [];
+                player.last_snake = [];
+                player.rainbow = 0;
             }
         };
         var move = function (e, d) {
@@ -108,6 +109,8 @@
                     var player = players[d.data[i].player.name];
                     player.last_snake = player.snake;
                     player.snake = d.data[i].player.snake;
+                    if (player.rainbow)
+                        player.rainbow -= 1;
                 }
             }
 
@@ -120,7 +123,10 @@
         };
         var cut = function (e, d) {};
         var apple_eaten = function (e, d) {};
-        var mouse_eaten = function (e, d) {};
+        var mouse_eaten = function (e, d) {
+            if (players[d.data])
+                players[d.data].rainbow = 15;
+        };
         var died = function (e, d) {};
         var game_over = function (e, d) {};
         var duel = function (e, d) {};
@@ -150,7 +156,10 @@
                         //noinspection JSDuplicatedDeclaration
                         var actual_phase = phase;
 
-                    drawer.draw_snake(player.snake, actual_phase, player.color);
+                    if (player['rainbow'])
+                        drawer.draw_snake(player.snake, actual_phase, 'rainbow');
+                    else
+                        drawer.draw_snake(player.snake, actual_phase, player.color);
                 } else if (d.data[i].apple) {
                     var apple_sprite = 'apple_' + ((d.data[i].apple[0] + d.data[i].apple[1]) % 3);
                     drawer.fill_square_from_sprite(d.data[i].apple, [0, 0, 0], 'food', apple_sprite);

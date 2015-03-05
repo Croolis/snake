@@ -179,7 +179,8 @@
 
         // Sprites
         // Src data is bound in the init sequence (see bottom of this class)
-        var snake_sprite = new Image();
+        var snake_sprite = new Image(),
+            snake_sprite_rainbow = [new Image(), new Image(), new Image()];
         var arrow_sprite = {
             "Left": new Image(),
             "Right": new Image(),
@@ -227,7 +228,12 @@
         // Draws an image from sprite of a passed type and color
         // Note that recolored sprite will be cached!
         self.fill_square_from_sprite = function (coordinates, color, phase, type) {
-            var colored_sprite = self.get_or_create_color(color);
+            if (color === 'rainbow')
+                //noinspection JSDuplicatedDeclaration
+                var colored_sprite = snake_sprite_rainbow[Math.floor(Math.random() * 3)];
+            else
+                //noinspection JSDuplicatedDeclaration
+                var colored_sprite = self.get_or_create_color(color);
             var element_coordinates = sprite_mappings[phase][type];
 
             context.drawImage(colored_sprite,
@@ -377,19 +383,25 @@
         // Waiting for images to load, than running callback
         var images_loaded = 0;
         snake_sprite.onload =
+            snake_sprite_rainbow[0].onload =
+            snake_sprite_rainbow[1].onload =
+            snake_sprite_rainbow[2].onload =
             arrow_sprite.Left.onload =
-                arrow_sprite.Right.onload =
-                    arrow_sprite.Up.onload =
-                        arrow_sprite.Down.onload = function () {
-                            images_loaded++;
-                            self.draw_loading_screen('Loading...', images_loaded / 5);
-                            if (images_loaded >= 5) {
-                                on_load_callback();
-                            }
-                        };
+            arrow_sprite.Right.onload =
+            arrow_sprite.Up.onload =
+            arrow_sprite.Down.onload = function () {
+                images_loaded++;
+                self.draw_loading_screen('Loading...', images_loaded / 8);
+                if (images_loaded >= 8) {
+                    on_load_callback();
+                }
+            };
 
         // Sprites data
         snake_sprite.src = "assets/snake2x.png";
+        snake_sprite_rainbow[0].src = "assets/snake2x_rainbow1.png";
+        snake_sprite_rainbow[1].src = "assets/snake2x_rainbow2.png";
+        snake_sprite_rainbow[2].src = "assets/snake2x_rainbow3.png";
         arrow_sprite.Left.src = "assets/arrow_left.png";
         arrow_sprite.Right.src = "assets/arrow_right.png";
         arrow_sprite.Up.src = "assets/arrow_up.png";
