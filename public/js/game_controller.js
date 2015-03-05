@@ -131,18 +131,41 @@
         var died = function (e, d) {};
         var game_over = function (e, d) {
             game_status = 3;
-            drawer.draw_win_screen(d.data);
+            if (d.data == self_name)
+                drawer.draw_win_screen('You');
+            else
+                drawer.draw_win_screen(d.data);
         };
         var duel = function (e, d) {
             game_status = 2;
-            drawer.draw_duel_screen(
-                d.data.player1,
-                d.data.player2,
-                d.data.pow1,
-                d.data.pow2,
-                d.data.orient1,
-                d.data.orient2
-            );
+
+            if (d.data.player1 == self_name) {
+                d.data.player1 = 'YOU';
+                drawer.draw_duel_screen(
+                    d.data.player1,
+                    d.data.player2,
+                    d.data.pow1,
+                    d.data.pow2,
+                    d.data.orient1,
+                    d.data.orient2);
+            } else if (d.data.player2 == self_name) {
+                d.data.player2 = 'YOU';
+                drawer.draw_duel_screen(
+                    d.data.player2,
+                    d.data.player1,
+                    d.data.pow2,
+                    d.data.pow1,
+                    d.data.orient2,
+                    d.data.orient1);
+            } else {
+                drawer.draw_duel_screen(
+                    d.data.player1,
+                    d.data.player2,
+                    d.data.pow1,
+                    d.data.pow2,
+                    d.data.orient1,
+                    d.data.orient2);
+            }
         };
         var duel_ended = function (e, d) {};
 
