@@ -122,7 +122,10 @@
             animation_frame_1 = window.setTimeout(function () {draw_main_frame(e, d, 1);}, dt / 3);
             animation_frame_2 = window.setTimeout(function () {draw_main_frame(e, d, 2);}, 2 * dt / 3);
         };
-        var cut = function (e, d) {};
+        var cut = function (e, d) {
+            if (players[d.data.victim].rainbow > 0)
+                players[d.data.predator].rainbow = players[d.data.victim].rainbow;
+        };
         var apple_eaten = function (e, d) {};
         var mouse_eaten = function (e, d) {
             if (players[d.data])
