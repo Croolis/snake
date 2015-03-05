@@ -129,7 +129,10 @@
                 players[d.data].rainbow = 15;
         };
         var died = function (e, d) {};
-        var game_over = function (e, d) {};
+        var game_over = function (e, d) {
+            game_status = 3;
+            drawer.draw_win_screen(d.data);
+        };
         var duel = function (e, d) {
             game_status = 2;
             drawer.draw_duel_screen(

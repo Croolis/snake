@@ -393,6 +393,14 @@
             context.fillRect(canvas_width - 100 - power2 / 100 * (canvas_width / 2 - 100), canvas_height / 2 - 35, power2 / 100 * (canvas_width / 2 - 100), 10);
             context.drawImage(arrow_sprite[direction2], canvas_width - 150, canvas_height / 2, 50, 50);
         };
+
+        self.draw_win_screen = function (player) {
+            context.clearRect(0, 0, canvas_width, canvas_height);
+
+            context.textBaseline = "middle";
+            context.textAlign = "center";
+            context.font = '25px Arial';
+            context.fillText(player + ' win!', canvas_width / 2, canvas_height / 2 - 50);
         };
 
 
